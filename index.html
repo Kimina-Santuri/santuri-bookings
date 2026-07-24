@@ -85,8 +85,6 @@ body{
 
     margin-bottom:35px;
 
-    margin-top:50px;
-
 }
 
 .hero h1{
@@ -202,6 +200,12 @@ body{
 .classroom{
     
     background-image:url("images/classroom.jpg");
+    
+}
+
+.workstation{
+    
+    background-image:url("images/workstation.jpg");
     
 }
 
@@ -541,6 +545,41 @@ Book DJ Practice
 
 </div>
 
+<div class="card">
+
+    <div class="image workstation"></div>
+
+    <div class="content">
+
+        <h3>Workstation Booking: </h3>
+
+        <p>
+            Reserve one of our workstations for work, taking a meeting, learning one of the synths or building electronics
+        </p>
+
+        <ul class="features">
+
+            <li>• Taking an Online Meeting</li>
+            <li>• Personal Gear Practice</li>
+            <li>• Self-Paced Learning</li>
+            <li>• Personal Work: Emails, Documents etc</li>
+            <li>• 1,000 KES/HR </li>
+
+        </ul>
+
+        <button onclick="Calendly.initPopupWidget({
+        url:'https://calendly.com/santuriworkstations-santuri/30min'
+        });return false;">
+
+        Book Workstation
+
+        </button>
+
+    </div>
+
+
+</div>
+
 </div>
 
 <div class="features">
@@ -640,8 +679,8 @@ function drawContours(){
 
     ctx.clearRect(0,0,width,height);
 
-    ctx.strokeStyle="#050505";
-    ctx.lineWidth=0.8;
+    ctx.strokeStyle="#222";
+    ctx.lineWidth=0.7;
 
 
     const cols=Math.ceil(width/resolution);
