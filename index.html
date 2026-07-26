@@ -806,10 +806,25 @@ function drawContours(){
     });
 
 
-    time+=0.005;
+    time+=0.0015;
 
     requestAnimationFrame(drawContours);
 
+}
+
+function openCalendly(url) {
+    // on phones and tables, open the booking page directly
+    if(window.matchMedia("(max-width: 786px)").matches) {
+        window.location.href = url;
+        return false;
+    }
+
+    //on Desktop, use the pop-up
+    Calendly.initPopupWidget({
+        url: url
+    });
+
+    return false;
 }
 
 
