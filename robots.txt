@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bookings.santuri.org/sitemap.xml
