@@ -104,7 +104,7 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 2. Deploy `email-notifications` with `--no-verify-jwt`, set its Zoho SMTP and shared-secret Edge Function secrets, and run `supabase/schedule-email-notifications.sql` with private placeholders replaced.
 3. Create a test client account and complete a full staging booking: submit a request, confirm it as staff, verify the Google event, record a payment, check the member balance and check request/confirmation emails.
 4. Test cancellation emails, completed/no-show messages, next-day reminders, a time occupied in Google, a Google all-day holiday block, weekly allowance reset, membership expiry and an image upload.
-5. Connect Classroom and Workstations only after their Google calendars are shared with the service account. Add their calendar IDs, confirm a successful sync, then enable their schedules.
+5. Classroom and Creative Workstation calendars are now connected and syncing. Configure their confirmed opening schedules in the Staff dashboard and enable online booking only after those hours are agreed.
 6. Review the privacy wording, data-retention process, backup plan, staff list and Sana studio allowance decision with the Santuri team.
 7. Only after staging checks pass, build the release, commit the approved files and publish through the existing GitHub/Sites process. Never commit service-account JSON, SMTP passwords or other secrets.
 
@@ -113,9 +113,10 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - The completed redesign was pushed to origin/main on 2026-09-03.
 - Landing-page space navigation was updated and pushed to origin/main on 2026-09-04.
 - The Santuri Membership Program page and its site-wide navigation links were pushed to origin/main on 2026-09-05.
-- The local main branch and origin/main were aligned at commit 402c01d after that push; AGENTS.md remains a local documentation change until explicitly committed.
+- The local main branch and origin/main were aligned at commit aabbc71 after the booking-system release; keep documentation and asset changes aligned with the pushed branch.
 - GitHub CLI is installed and authenticated as Kimina-Santuri on this machine.
 - The repository histories were joined with a normal merge commit; existing GitHub history was preserved without a force push.
-- Supabase, Google Calendar and account work is currently local/staging work. The current worktree includes uncommitted backend, frontend and documentation changes until an explicit release is approved.
+- Supabase, Google Calendar, account and notification work is deployed/configured for staging. Do not publish further site changes without an explicit release decision.
 - Confirmed temporary online-booking schedule: Recording Studio and DJ Practice Room are open Monday–Saturday, 09:00–18:00 EAT; Sunday is closed; maximum session length is four hours. Keep the minimum session and any future schedule changes configurable through the Staff dashboard.
 - Booking requests, staff approval/cancellation, password reset and the notification email flows have been tested successfully. Both `calendar-sync` and `email-notifications` are active in the linked Supabase project; treat their secrets and cron schedules as production configuration that must be checked before release.
+- The social-preview image is `assets/images/og.png`; it may be replaced by the team, ideally at a 1200×630 share-card ratio. The current replacement is 3386×1708 and may be cropped by social platforms.
