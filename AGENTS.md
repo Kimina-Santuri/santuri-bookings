@@ -44,6 +44,7 @@ This is a lightweight static booking and information website for Santuri East Af
 - Workstation capacity: one person
 - Staff are available to help.
 - Studio engineers can be arranged for 2,500 KES per hour.
+- NURA JCK runs regular CDJ practice sessions: Fridays in the DJ Practice Room and Saturdays from 11:00–18:00 in the Classroom.
 - Address: Santuri East Africa, Basement, The Mall, Chiromo Road / Ring Road Westlands, Nairobi, Kenya
 
 ## Membership program
@@ -113,10 +114,11 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - The completed redesign was pushed to origin/main on 2026-09-03.
 - Landing-page space navigation was updated and pushed to origin/main on 2026-09-04.
 - The Santuri Membership Program page and its site-wide navigation links were pushed to origin/main on 2026-09-05.
-- The local main branch and origin/main were aligned at commit aabbc71 after the booking-system release; keep documentation and asset changes aligned with the pushed branch.
+- The local main branch and origin/main were aligned at commit 23babdf after the booking-system release and social-preview update; keep documentation and site changes aligned with the pushed branch.
 - GitHub CLI is installed and authenticated as Kimina-Santuri on this machine.
 - The repository histories were joined with a normal merge commit; existing GitHub history was preserved without a force push.
 - Supabase, Google Calendar, account and notification work is deployed/configured for staging. Do not publish further site changes without an explicit release decision.
 - Confirmed temporary online-booking schedule: Recording Studio and DJ Practice Room are open Monday–Saturday, 09:00–18:00 EAT; Sunday is closed; maximum session length is four hours. Keep the minimum session and any future schedule changes configurable through the Staff dashboard.
 - Booking requests, staff approval/cancellation, password reset and the notification email flows have been tested successfully. Both `calendar-sync` and `email-notifications` are active in the linked Supabase project; treat their secrets and cron schedules as production configuration that must be checked before release.
 - The social-preview image is `assets/images/og.png`; it may be replaced by the team, ideally at a 1200×630 share-card ratio. The current replacement is 3386×1708 and may be cropped by social platforms.
+- The homepage space grid includes a NURA JCK booking card with matching primary buttons for Friday DJ Practice Room sessions and Saturday Classroom sessions, both listed as 11:00–18:00. The buttons open the authenticated booking calendar with the relevant space selected.

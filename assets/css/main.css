@@ -48,6 +48,9 @@ img{max-width:100%;height:auto}
 .space-actions button{flex:1}
 .space-actions .book-link{flex:1}
 .space-card .button{background:var(--ink);color:var(--white);border-color:var(--ink);gap:1rem;padding:.85rem 1rem}
+.featured-booking-card .space-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.featured-booking-card .space-actions .button{min-height:3.5rem;justify-content:center;text-align:center;background:var(--white);color:var(--ink);border-color:var(--ink)}
+.featured-booking-card .space-actions .button:hover{background:var(--ink);color:var(--white);border-color:var(--white)}
 .secondary-button{background:transparent;color:var(--ink);border:1px solid var(--ink);padding:.85rem 1rem;font:700 .7rem var(--mono);text-transform:uppercase;cursor:pointer}
 .details-link{display:flex;align-items:center;justify-content:center;text-decoration:none}
 .how-section{display:grid;grid-template-columns:1fr 1fr;gap:5rem;padding:clamp(5rem,9vw,9rem) clamp(1.25rem,7vw,8rem)}
@@ -187,6 +190,7 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .visit-section{grid-template-areas:"copy" "map" "help"}
 .section-heading{gap:1rem}
 .space-grid{grid-template-columns:1fr}
+.featured-booking-card .space-actions{grid-template-columns:1fr}
 .how-section,.visit-section{gap:3rem}
 .visit-map{justify-self:start;max-width:100%}
 .need-help{grid-template-columns:1fr;grid-template-areas:"label" "title" "copy" "action";gap:.5rem}
