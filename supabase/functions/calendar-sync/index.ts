@@ -43,7 +43,7 @@ Deno.serve(async request=>{
           if(!response.ok&&![404,410].includes(response.status))throw Error(`Calendar delete failed (${response.status})`);
         }else{
           // Pending requests reserve the resource in both calendars, without inviting people.
-          const event={id,summary:`${job.status==='requested'?'[Requested] ':''}${job.space_name} · Santuri`,start:{dateTime:job.starts_at,timeZone:'Africa/Nairobi'},end:{dateTime:job.ends_at,timeZone:'Africa/Nairobi'},status:'confirmed',transparency:'opaque',extendedProperties:{private:{santuriBookingId:job.booking_id}},description:'Manage this booking in the Santuri staff dashboard.'};
+          const event={id,summary:`${job.status==='requested'?'[Requested] ':''}${job.requester_name} · ${job.space_name}`,start:{dateTime:job.starts_at,timeZone:'Africa/Nairobi'},end:{dateTime:job.ends_at,timeZone:'Africa/Nairobi'},status:'confirmed',transparency:'opaque',extendedProperties:{private:{santuriBookingId:job.booking_id}},description:'Manage this booking in the Santuri staff dashboard.'};
           let response=await google(`${path}/${id}?sendUpdates=none`,{method:'PUT',body:JSON.stringify(event)});
           if([404,410].includes(response.status))response=await google(`${path}?sendUpdates=none`,{method:'POST',body:JSON.stringify(event)});
           if(response.status===409)response=await google(`${path}/${id}?sendUpdates=none`,{method:'PUT',body:JSON.stringify(event)});

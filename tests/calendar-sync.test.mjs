@@ -11,7 +11,7 @@ test('calendar sync authenticates cron, retries deterministically and imports pr
  await import(`data:text/javascript;base64,${Buffer.from(output.outputFiles[0].text).toString('base64')}`);
  const originalFetch=globalThis.fetch;let requests=[];let calls=[];let updates=[];let claimed=true;
  const id='11111111-1111-4111-8111-111111111111';
- const jobs=[{booking_id:id,revision:2,calendar_id:'room@example.test',status:'requested',space_name:'Recording Studio',starts_at:'2026-09-10T06:00:00Z',ends_at:'2026-09-10T08:00:00Z'},{booking_id:'22222222-2222-4222-8222-222222222222',revision:3,calendar_id:'room@example.test',status:'cancelled'}];
+ const jobs=[{booking_id:id,revision:2,calendar_id:'room@example.test',status:'requested',requester_name:'Alice Example',space_name:'Recording Studio',starts_at:'2026-09-10T06:00:00Z',ends_at:'2026-09-10T08:00:00Z'},{booking_id:'22222222-2222-4222-8222-222222222222',revision:3,calendar_id:'room@example.test',status:'cancelled'}];
  globalThis.__calendarTestDb={rpc:async(name,args)=>{calls.push({name,args});return {error:null,data:name==='claim_calendar_sync'?claimed:name==='calendar_jobs'?jobs:null};},from:()=>({select:async()=>({error:null,data:[{space_id:'space-1',calendar_id:'room@example.test',revision:1}]}),update:data=>({eq:async()=>{updates.push(data);return {error:null,data:null};}})})};
  let failEvents=false;
  globalThis.fetch=async(url,opts={})=>{
@@ -32,7 +32,7 @@ test('calendar sync authenticates cron, retries deterministically and imports pr
   await t.test('a run already holding the lease prevents duplicate processing',async()=>{claimed=false;assert.equal((await (await handler(request())).json()).status,'already_running');assert.equal(requests.length,0);claimed=true;calls=[];});
   await t.test('creates requested events, treats already-deleted cancellations as success and paginates',async()=>{
    const response=await handler(request());assert.equal(response.status,200);assert.equal((await response.json()).status,'ok');
-   const event=JSON.parse(requests.find(r=>r.method==='POST'&&r.url.includes('/events')).body);assert.equal(event.id,'santuri'+id.replaceAll('-',''));assert.equal(event.summary,'[Requested] Recording Studio · Santuri');assert.equal(event.attendees,undefined);
+   const event=JSON.parse(requests.find(r=>r.method==='POST'&&r.url.includes('/events')).body);assert.equal(event.id,'santuri'+id.replaceAll('-',''));assert.equal(event.summary,'[Requested] Alice Example · Recording Studio');assert.equal(event.attendees,undefined);
    const imported=calls.find(c=>c.name==='replace_google_blocks').args.p_blocks;assert.deepEqual(imported.map(b=>b.id),['busy','all-day']);assert.equal(imported[1].start,'2026-09-12T00:00:00+03:00');assert.equal(calls.filter(c=>c.name==='calendar_job_done'&&c.args.p_error===null).length,2);assert.equal(calls.at(-1).name,'release_calendar_sync');
   });
   await t.test('failed Google writes remain retryable and close the affected calendar',async()=>{requests=[];calls=[];failEvents=true;const response=await handler(request());assert.equal((await response.json()).status,'retry_needed');assert.ok(calls.find(c=>c.name==='calendar_job_done'&&c.args.p_id===id&&c.args.p_error));assert.equal(calls.some(c=>c.name==='replace_google_blocks'),false);assert.ok(updates[0].sync_error);assert.equal(calls.at(-1).name,'release_calendar_sync');});
