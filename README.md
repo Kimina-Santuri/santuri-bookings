@@ -1,11 +1,23 @@
 # Santuri East Africa Bookings
 
-A lightweight, accessible booking site for Santuri East Africa's creative spaces. The site is static and uses Calendly for scheduling.
+Framework-free static website with an optional Supabase account and booking system. Existing Calendly bookings continue until the new backend is connected.
 
-## Updating spaces
+## Local development
 
-Room descriptions, categories, rates and Calendly links live in `assets/js/main.js`. Business policies defer to the current booking confirmation; replace them with approved terms when available.
+```sh
+npm install
+npm run build
+npm test
+npm run check
+npm run dev
+```
 
-## Local preview
+Open `http://127.0.0.1:8080`. The new pages are `account.html`, `dashboard.html`, `book.html`, `bookings.html`, `admin.html` and `reset-password.html`. Without a configured backend, account operations are disabled and the staff page shows a read-only space preview.
 
-Run any static file server from this directory, then open the local URL in a browser.
+## Backend setup
+
+Follow [docs/SETUP.md](docs/SETUP.md) to configure Supabase, appoint staff, connect the existing email provider and schedule Google Calendar sync. Public connection settings go in `assets/js/config.js`; private keys never belong in the repository.
+
+The database schema, permissions and booking rules are versioned in `supabase/migrations`. Space images use Supabase Storage. Staff edit space descriptions, prices, images and schedules in the dashboard after setup. Existing room data in `assets/js/main.js` remains the unconfigured Calendly fallback.
+
+`npm run build` produces public files in `dist/`; database scripts, source documentation and secrets are excluded. GitHub remains the canonical code repository. Keep work local until a release is explicitly approved; do not update Sites or the custom domain by default.

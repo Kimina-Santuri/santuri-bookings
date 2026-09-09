@@ -225,3 +225,5 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 *,*::before,*::after{animation:none!important;transition:none!important}
 #topography{display:none}
 }
+
+@media(max-width:760px){.site-header nav>a.account-nav-link{display:block}}

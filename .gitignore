@@ -1,2 +1,14 @@
 .DS_Store
 dist/
+
+node_modules/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+# Google service-account credentials must never be committed.
+*-google-service-account.json
+santuri-bookings-a5b18a367f90.json
+# Local reference copy and private calendar notes stay outside releases.
+previous-static-version/
+g-cal ids.rtf

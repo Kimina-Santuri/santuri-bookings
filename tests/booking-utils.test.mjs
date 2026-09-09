@@ -1,0 +1,7 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {escapeHTML,safeImage,safeCalendly,weekStart,dayKey,outstanding,calendarFile} from '../assets/js/booking-utils.js';
+test('untrusted room content and image URLs cannot become executable markup',()=>{assert.equal(escapeHTML('<img onerror="x">'),'&lt;img onerror=&quot;x&quot;&gt;');assert.equal(safeImage('javascript:alert(1)'),'assets/images/logo.png');assert.equal(safeImage('assets/images/../../private'),'assets/images/logo.png');assert.equal(safeCalendly('https://calendly.com.evil.test/foo'),'');});
+test('Nairobi week boundaries are independent of the visitor timezone',()=>{assert.equal(dayKey(new Date('2026-09-06T22:00:00Z')),'2026-09-07');assert.equal(weekStart('2026-09-06'),'2026-08-31');assert.equal(weekStart('2026-09-07'),'2026-09-07');});
+test('void payments restore the outstanding balance',()=>{assert.equal(outstanding({id:'a',price:1000},[{booking_id:'a',amount:400,status:'paid'},{booking_id:'a',amount:600,status:'void'}]),600);});
+test('calendar export uses absolute timestamps and escapes event text',()=>{const text=calendarFile({id:'abc',space_name:'Studio, one\nTwo',starts_at:'2026-09-07T09:00:00+03:00',ends_at:'2026-09-07T10:00:00+03:00'});assert.ok(text.includes('DTSTART:20260907T060000Z'));assert.ok(text.includes('SUMMARY:Studio\\, one\\nTwo'));assert.ok(text.endsWith('END:VCALENDAR\r\n'));});

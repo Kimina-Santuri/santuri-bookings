@@ -1,0 +1,80 @@
+[
+  {
+    "id": "studio",
+    "title": "Recording Studio",
+    "type": [
+      "sound"
+    ],
+    "capacity": "Up to 5 people",
+    "image": "assets/images/studio.jpg",
+    "alt": "Santuri production and recording studio",
+    "tag": "Record \u00b7 Produce \u00b7 Mix",
+    "summary": "A maintained production room for recording, mixing and collaborative sessions.",
+    "features": [
+      "Music production",
+      "Recording sessions",
+      "Mixing and mastering",
+      "Collaborative projects",
+      "Podcast and voice-over recording"
+    ],
+    "booking": "https://calendly.com/studio-santuri/studio-bookings"
+  },
+  {
+    "id": "dj",
+    "title": "DJ Practice Room",
+    "type": [
+      "sound"
+    ],
+    "capacity": "Up to 3 people",
+    "image": "assets/images/dj-room.jpg",
+    "alt": "Santuri DJ practice room with professional decks",
+    "tag": "Practice \u00b7 Learn \u00b7 Refine",
+    "summary": "Dedicated time on a professional DJ setup, whether you\u2019re learning or preparing a set.",
+    "features": [
+      "Pioneer CDJ setup",
+      "Traktor controller setup",
+      "Private practice sessions",
+      "Private lessons"
+    ],
+    "booking": "https://calendly.com/djpractice-santuri/30min?primary_color=787878"
+  },
+  {
+    "id": "classroom",
+    "title": "Classroom",
+    "type": [
+      "group"
+    ],
+    "capacity": "Up to 20 people",
+    "image": "assets/images/classroom.jpg",
+    "alt": "Santuri classroom set up for a group session",
+    "tag": "Teach \u00b7 Meet \u00b7 Rehearse",
+    "summary": "A flexible group space for workshops, rehearsals, meetings and collaboration.",
+    "features": [
+      "Workshops and training",
+      "Group rehearsals",
+      "Community meetings",
+      "Creative collaboration"
+    ],
+    "booking": "https://calendly.com/classroompractice-santuri/30min"
+  },
+  {
+    "id": "workstation",
+    "title": "Creative Workstation",
+    "type": [
+      "focus"
+    ],
+    "capacity": "1 person",
+    "image": "assets/images/workstation.jpg",
+    "alt": "Santuri workstation for focused creative work",
+    "tag": "Work \u00b7 Learn \u00b7 Build",
+    "summary": "A focused station for online work, music technology practice and electronics projects.",
+    "features": [
+      "Online meetings",
+      "Personal gear practice",
+      "Self-paced synth learning",
+      "Email and document work",
+      "Electronics projects"
+    ],
+    "booking": "https://calendly.com/santuriworkstations-santuri/30min"
+  }
+]
