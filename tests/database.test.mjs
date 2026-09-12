@@ -101,6 +101,32 @@ test('database enforces booking, payment and staff permissions',async t=>{
   assert.equal((await rpc('member_allowances',[bob,start])).studio.remaining,4);
   await as(bob);await rejects(()=>rpc('adjust_allowance',[bob,balances.production.week_start,'studio',20,'Self grant']),/Staff access/);
  });
+ await t.test('students share eight hours across every space without staff privileges',async()=>{
+  await as(alice);await rejects(()=>rpc('set_student_member',[alice,true]),/Staff access/);
+  await rejects(()=>query('insert into private.students values($1)',[alice]),/permission denied/);
+  await as(admin);await rpc('set_student_member',[bob,true]);assert.equal(await rpc('member_is_student',[bob]),true);
+  const rooms=await query('select * from spaces order by slug');
+  for(const r of rooms)await rpc('save_space',[r.id,r.version,{...r,booking_enabled:true},Array.from({length:7},(_,weekday)=>({weekday,opens:'09:00',closes:'18:00'}))]);
+  await as(bob);assert.equal(await rpc('is_staff'),false);
+  const ids=[];
+  for(let i=0;i<rooms.length;i++){
+   const when=new Date(new Date(start).getTime()+86400000+i*2*3600000).toISOString();
+   const id=await rpc('request_booking',[rooms[i].id,when,120,true,'Student test',randomUUID()]);ids.push(id);
+   const row=(await query('select * from bookings where id=$1',[id]))[0];assert.equal(row.allowance_kind,'student');assert.equal(Number(row.price),0);
+  }
+  let balance=(await rpc('my_allowances',[start])).production;assert.equal(balance.remaining,0);assert.equal(balance.reserved,480);
+  const extra=new Date(new Date(start).getTime()+2*86400000).toISOString();
+  await rejects(()=>rpc('request_booking',[room.id,extra,60,true,'',randomUUID()]),/student hours/);
+  await rpc('set_booking_status',[ids[0],'cancelled','']);assert.equal((await rpc('my_allowances',[start])).production.remaining,120);
+  // Seed attendance as the database owner to test consumption independently of the real-time attendance gate.
+  await db.exec('reset role');await query("update bookings set status='no_show' where id=$1",[ids[1]]);await as(admin);
+  balance=(await rpc('member_allowances',[bob,start])).production;assert.equal(balance.used,120);assert.equal(balance.remaining,120);
+  assert.equal((await rpc('member_allowances',[bob,new Date(new Date(start).getTime()+7*86400000).toISOString()])).production.remaining,480);
+  await rpc('set_student_member',[bob,false]);await rpc('set_student_member',[bob,true]);assert.equal((await rpc('member_allowances',[bob,start])).production.remaining,120);
+  await rpc('set_staff_member',[bob,true]);assert.equal((await rpc('member_allowances',[bob,start])).production.unlimited,true);await rpc('set_staff_member',[bob,false]);
+  await rpc('set_student_member',[bob,false]);assert.equal((await rpc('member_allowances',[bob,start])).production.tier,'sana');
+  await as(bob);await rejects(()=>rpc('request_booking',[rooms.find(r=>r.allowance_kind==='none').id,extra,60,true,'',randomUUID()]),/No eligible/);
+ });
  await t.test('calendar sync functions are service-only and stale calendars close slots',async()=>{
   await as(admin);await rpc('connect_calendar',[room.id,'test@group.calendar.google.com']);
   await as(alice);await rejects(()=>rpc('request_booking',[room.id,start,60,true,'',randomUUID()]),/unavailable/);

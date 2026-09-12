@@ -114,12 +114,22 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - The completed redesign was pushed to origin/main on 2026-09-03.
 - Landing-page space navigation was updated and pushed to origin/main on 2026-09-04.
 - The Santuri Membership Program page and its site-wide navigation links were pushed to origin/main on 2026-09-05.
-- The local main branch and origin/main were aligned at commit 23babdf after the booking-system release and social-preview update; keep documentation and site changes aligned with the pushed branch.
+- The booking-system release and social-preview update were previously aligned at commit 23babdf; see the dated release notes below for subsequent changes.
 - GitHub CLI is installed and authenticated as Kimina-Santuri on this machine.
 - The repository histories were joined with a normal merge commit; existing GitHub history was preserved without a force push.
 - Supabase, Google Calendar, account and notification work is deployed/configured for staging. Do not publish further site changes without an explicit release decision.
 - Confirmed temporary online-booking schedule: Recording Studio and DJ Practice Room are open Monday–Saturday, 09:00–18:00 EAT; Sunday is closed; maximum session length is four hours. Keep the minimum session and any future schedule changes configurable through the Staff dashboard.
 - Booking requests, staff approval/cancellation, password reset and the notification email flows have been tested successfully. Both `calendar-sync` and `email-notifications` are active in the linked Supabase project; treat their secrets and cron schedules as production configuration that must be checked before release.
 - The social-preview image is `assets/images/og.png`; it may be replaced by the team, ideally at a 1200×630 share-card ratio. The current replacement is 3386×1708 and may be cropped by social platforms.
-- The homepage space grid includes a NURA JCK booking card with matching primary buttons for Friday DJ Practice Room sessions and Saturday Classroom sessions, both listed as 11:00–18:00. The buttons open the authenticated booking calendar with the relevant space selected.
+- The homepage space grid includes a clickable NURA x JCK card linking to `nura-jck.html`. Its dedicated page has matching Friday DJ Practice Room and Saturday Classroom booking buttons, with both sessions listed as 11:00–18:00. The buttons open the authenticated booking calendar with the relevant space selected.
 - Approved booking events synced to Google Calendar include the booker’s name and space in the event title; pending requests retain a `[Requested]` prefix. This is implemented in migration `202609090005_calendar_booking_names.sql` and the deployed `calendar-sync` function.
+
+## Student access and NURA x JCK release (2026-09-12)
+
+- Staff manually grant/remove Student access in Members. Students receive 480 shared minutes per Nairobi week across all spaces, subject to configured booking availability and approval; hours reset Monday with no carryover. Student access grants no staff privileges or alumni eligibility.
+- Migration `202609120001_student_access.sql` has been applied to the connected Supabase project and its API schema refreshed to enable local student testing. Staff access takes priority; Student access uses its own shared pool while assigned, separately from paid-tier allowances.
+- NURA x JCK card now uses `assets/images/nura.jpg` and `assets/images/nuralogo.png`.
+- The homepage NURA x JCK card is a single keyboard-accessible link to `nura-jck.html`. The dedicated page contains confirmed session details and the Friday DJ / Saturday Classroom booking buttons at the bottom.
+
+- The user approved pushing this complete version to the canonical GitHub `main` branch on 2026-09-12. No separate Sites deployment was requested. Future changes remain local unless approved.
+- Verification: all 21 automated tests pass; `npm run check` and `npm run build` pass; all 12 pages respond on the local preview. The connected API resolves student functions and rejects unauthenticated access.

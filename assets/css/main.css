@@ -48,6 +48,10 @@ img{max-width:100%;height:auto}
 .space-actions button{flex:1}
 .space-actions .book-link{flex:1}
 .space-card .button{background:var(--ink);color:var(--white);border-color:var(--ink);gap:1rem;padding:.85rem 1rem}
+.nura-brand{display:flex;align-items:center;gap:.75rem;margin:.5rem 0}
+.nura-brand .nura-logo{width:5rem;height:5rem;object-fit:contain;flex-shrink:0;filter:grayscale(1)}
+.nura-brand h3{margin:0}
+.featured-booking-card:hover .nura-logo{transform:none;filter:grayscale(1)}
 .featured-booking-card .space-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 .featured-booking-card .space-actions .button{min-height:3.5rem;justify-content:center;text-align:center;background:var(--white);color:var(--ink);border-color:var(--ink)}
 .featured-booking-card .space-actions .button:hover{background:var(--ink);color:var(--white);border-color:var(--white)}
@@ -231,3 +235,22 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 }
 
 @media(max-width:760px){.site-header nav>a.account-nav-link{display:block}}
+
+/* NURA x JCK session page and linked homepage card. */
+.nura-card-link{text-decoration:none}
+.nura-card-link .space-actions{grid-template-columns:1fr}
+.nura-card-link:focus-visible{outline:3px solid #2762ff;outline-offset:4px}
+.nura-page{padding:clamp(2rem,5vw,5rem) clamp(1.25rem,5vw,6rem)}
+.nura-intro{display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(2rem,5vw,5rem);align-items:center;padding-bottom:4rem}
+.nura-page-logo{display:block;width:9rem;height:9rem;object-fit:contain;filter:grayscale(1);margin:1.5rem 0}
+.nura-intro h1{font-size:clamp(3rem,6vw,6rem);letter-spacing:-.06em;line-height:1;margin:0}
+.nura-lead{font-size:1.5rem;margin-bottom:.75rem}
+.nura-page-image img{display:block;width:100%;height:auto}
+.nura-details{display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(2rem,5vw,5rem);padding:3rem 0;border-top:1px solid var(--line)}
+.nura-page h2{font-size:clamp(2rem,3.5vw,3.5rem);line-height:1.1;letter-spacing:-.04em;margin:0 0 1.5rem}
+.nura-schedule{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.nura-schedule h3{font-size:1.4rem;margin:0}
+.nura-booking{border-top:1px solid var(--ink);padding:3rem 0 1rem}
+.nura-booking-actions{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}
+.nura-booking-actions .button{background:var(--ink);color:var(--white)}
+@media(max-width:760px){.nura-intro,.nura-details{grid-template-columns:1fr}.nura-schedule{grid-template-columns:1fr}.nura-booking-actions{flex-direction:column}.nura-booking-actions .button{justify-content:center;text-align:center}}
