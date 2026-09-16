@@ -147,3 +147,8 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - Migration `202609160001_role_assignment_emails.sql` is applied to the connected Supabase project. Granting Staff, Student, or NURA access queues one `role_assigned` message for that member; repeated grants do not send duplicates. Revocations do not send an email.
 - The `email-notifications` Edge Function was redeployed with role-assignment message handling. It uses the existing SMTP secrets, including the configured Zepto Mail sender settings; credentials remain Supabase secrets.
+
+## Staff member access columns (2026-09-16)
+
+- Staff → Members now shows separate Roles and Membership columns. Roles include Staff, Student, and NURA; membership shows the currently active paid tier or Free Tier.
+- Migration `202609160002_member_access_summary.sql` is applied to the connected Supabase project. The summary function is staff-only and does not expose private role tables to members.
