@@ -142,3 +142,8 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - Migration `202609150001_nura_access.sql` has been applied to the connected Supabase project and the API schema refreshed. Existing room opening schedules, booking enablement and calendar health still control availability.
 - Verified with the connected staff account: Friday 2026-09-18 has 13 one-hour slots in the DJ Practice Room from 11:00–18:00 EAT; Saturday 2026-09-19 has 13 one-hour slots in the Classroom from 11:00–18:00 EAT. Later dates are also resolving through the NURA slot function.
 - The user reports switching the email sender to Zepto Mail. This task does not change or verify the deployed SMTP secrets; the local notification function still supports SMTP configuration through secrets.
+
+## Role assignment email notifications (2026-09-16)
+
+- Migration `202609160001_role_assignment_emails.sql` is applied to the connected Supabase project. Granting Staff, Student, or NURA access queues one `role_assigned` message for that member; repeated grants do not send duplicates. Revocations do not send an email.
+- The `email-notifications` Edge Function was redeployed with role-assignment message handling. It uses the existing SMTP secrets, including the configured Zepto Mail sender settings; credentials remain Supabase secrets.

@@ -529,6 +529,23 @@ revoke all on function public.set_nura_member(uuid,boolean),public.nura_slots(da
 grant execute on function public.set_nura_member(uuid,boolean),public.nura_slots(date,integer),public.request_nura_booking(timestamptz,integer,text,uuid) to authenticated;
 commit;
 
+-- Source: supabase/migrations/202609160001_role_assignment_emails.sql
+begin;
+alter table private.email_outbox alter column booking_id drop not null;
+alter table private.email_outbox drop constraint email_outbox_kind_check;
+alter table private.email_outbox add constraint email_outbox_kind_check check(kind in ('request_received','booking_confirmed','booking_cancelled','booking_completed','booking_no_show','booking_reminder','role_assigned'));
+create function private.queue_role_assignment_email(p_user uuid,p_role text) returns void language plpgsql security definer set search_path='' as $$
+declare p public.profiles; role_label text;
+begin
+ if p_role not in ('staff','student','nura') then raise exception 'Invalid role for email notification'; end if;
+ select * into p from public.profiles where id=p_user;
+ if p.email is null or length(trim(p.email))=0 then return; end if;
+ role_label:=case p_role when 'staff' then 'Staff access' when 'student' then 'Student access' else 'NURA access' end;
+ insert into private.email_outbox(booking_id,recipient,kind,payload) values(null,lower(trim(p.email)),'role_assigned',jsonb_build_object('subject','Santuri access updated','name',p.full_name,'role',p_role,'role_label',role_label));
+end; $$;
+-- Role mutation functions in the migration above queue the role_assigned message.
+commit;
+
 -- Source: supabase/seed.sql
 -- Confirmed existing spaces. Opening DAYS are deliberately not invented.
 -- Configure weekly hours in the staff dashboard before enabling bookings.

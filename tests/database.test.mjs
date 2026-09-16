@@ -105,6 +105,12 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await as(alice);await rejects(()=>rpc('set_student_member',[alice,true]),/Staff access/);
   await rejects(()=>query('insert into private.students values($1)',[alice]),/permission denied/);
   await as(admin);await rpc('set_student_member',[bob,true]);assert.equal(await rpc('member_is_student',[bob]),true);
+  await as(null,'service_role');
+  assert.equal((await query("select kind,recipient,payload->>'role' as role from private.email_outbox where kind='role_assigned' and recipient='bob@example.test' order by created_at desc limit 1"))[0].role,'student');
+  await as(admin);await rpc('set_student_member',[bob,true]);
+  await as(null,'service_role');
+  assert.equal((await query("select count(*)::int as count from private.email_outbox where kind='role_assigned' and recipient='bob@example.test' and payload->>'role'='student'"))[0].count,1);
+  await as(admin);
   const rooms=await query('select * from spaces order by slug');
   for(const r of rooms)await rpc('save_space',[r.id,r.version,{...r,booking_enabled:true},Array.from({length:7},(_,weekday)=>({weekday,opens:'09:00',closes:'18:00'}))]);
   await as(bob);assert.equal(await rpc('is_staff'),false);
