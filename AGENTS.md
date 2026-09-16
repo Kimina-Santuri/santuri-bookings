@@ -133,3 +133,12 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - The user approved pushing this complete version to the canonical GitHub `main` branch on 2026-09-12. No separate Sites deployment was requested. Future changes remain local unless approved.
 - Verification: all 21 automated tests pass; `npm run check` and `npm run build` pass; all 12 pages respond on the local preview. The connected API resolves student functions and rejects unauthenticated access.
+
+## NURA access — deployed (2026-09-16)
+
+- Staff can grant/remove NURA access in Members. It provides 240 shared minutes per Nairobi week, resetting Monday without carryover, independently of Student and paid-tier allowances. Existing Staff access remains unlimited.
+- NURA x JCK appears as a virtual booking card using `assets/images/nura.jpg`, linked via `book.html?space=nura`. Friday sessions reserve the existing DJ Practice Room; Saturday sessions reserve the existing Classroom, between 11:00 and 18:00 EAT. It does not create another physical space or calendar.
+- Migration `202609150001_nura_access.sql` enforces assignment, the weekly limit, weekday/time restrictions, and the physical room's availability and locking. Normal booking status, notification and calendar-sync paths apply. Cancellation releases hours; completed/no-show bookings consume them.
+- Migration `202609150001_nura_access.sql` has been applied to the connected Supabase project and the API schema refreshed. Existing room opening schedules, booking enablement and calendar health still control availability.
+- Verified with the connected staff account: Friday 2026-09-18 has 13 one-hour slots in the DJ Practice Room from 11:00–18:00 EAT; Saturday 2026-09-19 has 13 one-hour slots in the Classroom from 11:00–18:00 EAT. Later dates are also resolving through the NURA slot function.
+- The user reports switching the email sender to Zepto Mail. This task does not change or verify the deployed SMTP secrets; the local notification function still supports SMTP configuration through secrets.
