@@ -147,6 +147,7 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - Migration `202609160001_role_assignment_emails.sql` is applied to the connected Supabase project. Granting Staff, Student, or NURA access queues one `role_assigned` message for that member; repeated grants do not send duplicates. Revocations do not send an email.
 - The `email-notifications` Edge Function was redeployed with role-assignment message handling. It uses the existing SMTP secrets, including the configured Zepto Mail sender settings; credentials remain Supabase secrets.
+- A follow-up worker fix moved booking date/time formatting after the role-message branch. The deployed worker now handles role emails without booking fields; 13 previously failed queued role messages were released for retry on 2026-09-16.
 
 ## Staff member access columns (2026-09-16)
 
