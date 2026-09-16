@@ -153,3 +153,8 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - Staff → Members now shows separate Roles and Membership columns. Roles include Staff, Student, and NURA; membership shows the currently active paid tier or Free Tier.
 - Migration `202609160002_member_access_summary.sql` is applied to the connected Supabase project. The summary function is staff-only and does not expose private role tables to members.
+
+## Shared staff calendar (2026-09-16)
+
+- The Staff dashboard Calendar & bookings tab is a single month calendar showing all non-cancelled bookings and blocked periods together. Each event includes its time, space, member or block source, and booking status. Staff can move between months and still use Block time + from this tab.
+- The shared calendar uses the existing public bookings and space_blocks records; no separate calendar table or external calendar is introduced.
