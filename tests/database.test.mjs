@@ -69,6 +69,24 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await rejects(()=>rpc('set_booking_status',[bookingId,'cancelled','']),/Access denied/);
   await rejects(()=>rpc('request_booking',[room.id,start,60,false,'',randomUUID()]),/unavailable/);
  });
+ await t.test('shared calendar is authenticated and omits private booking data',async()=>{
+  const from=new Date(new Date(start).getTime()-86400000).toISOString(),until=new Date(new Date(start).getTime()+86400000).toISOString();
+  await as(null,'anon');await rejects(()=>query('select * from shared_calendar($1,$2)',[from,until]),/permission denied/);
+  await as(null);await rejects(()=>query('select * from shared_calendar($1,$2)',[from,until]),/Sign in required/);
+  await as(bob);
+  const events=await query('select * from shared_calendar($1,$2)',[from,until]);
+  assert.equal(events.length,1);assert.equal(events[0].space_name,room.name);
+  assert.deepEqual(Object.keys(events[0]).sort(),['kind','space_id','space_name','starts_at','ends_at','status'].sort());
+  assert.equal((await query('select * from bookings')).length,0);
+  await rejects(()=>query('select * from shared_calendar($1,$2)',[until,from]),/calendar range/);
+  await rejects(()=>query("select * from shared_calendar(now(),now()+interval '33 days')"),/calendar range/);
+  await as(admin);
+  const blockId=await rpc('add_block',[room.id,until,new Date(new Date(until).getTime()+86400000).toISOString(),'Private staff reason']);
+  await as(bob);
+  const blocks=await query('select * from shared_calendar($1,$2)',[until,new Date(new Date(until).getTime()+86400000).toISOString()]);
+  assert.equal(blocks[0].kind,'block');assert.equal(blocks[0].status,'blocked');assert.equal(blocks[0].reason,undefined);
+  await as(admin);await rpc('remove_block',[blockId]);
+ });
  await t.test('cancellation releases allowance; Monday resets and expiry use Nairobi time',async()=>{
   await as(alice);await rpc('set_booking_status',[bookingId,'cancelled','']);assert.equal((await rpc('my_allowances',[start])).production.remaining,240);
   const later=new Date(new Date(start).getTime()+7*86400000).toISOString();assert.equal((await rpc('my_allowances',[later])).production.remaining,240);

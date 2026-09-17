@@ -16,3 +16,25 @@ export function calendarFile(booking) {
   const text = v => String(v).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');
   return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Santuri East Africa//Bookings//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:${booking.id}@bookings.santuri.org`,`DTSTAMP:${stamp(new Date())}`,`DTSTART:${stamp(booking.starts_at)}`,`DTEND:${stamp(booking.ends_at)}`,`SUMMARY:${text(booking.space_name)} — Santuri`,`LOCATION:${text('Santuri East Africa, Basement, The Mall, Westlands, Nairobi')}`,'STATUS:CONFIRMED','END:VEVENT','END:VCALENDAR',''].join('\r\n');
 }
+
+// UTC normalization handles day zero, leap years and December rollover.
+export const calendarDate = (year, month, day) => new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
+export function calendarMonth(year, month) {
+ const first = calendarDate(year, month, 1);
+ const end = `${calendarDate(year, month + 1, 1)}T00:00:00+03:00`;
+ const count = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+ const offset = (new Date(`${first}T12:00:00Z`).getUTCDay() + 6) % 7;
+ return {start: `${first}T00:00:00+03:00`, end,
+  cells: [...Array(offset).fill(null), ...Array.from({length: count}, (_, i) => calendarDate(year, month, i + 1))]};
+}
+export function overlapsDay(event, day) {
+ const start = new Date(`${day}T00:00:00+03:00`).getTime();
+ return new Date(event.starts_at).getTime() < start + 86400000 && new Date(event.ends_at).getTime() > start;
+}
+
+export function calendarEventTime(event, day) {
+ const start = new Date(`${day}T00:00:00+03:00`).getTime(), end = start + 86400000;
+ const from = new Date(event.starts_at).getTime(), until = new Date(event.ends_at).getTime();
+ if (from <= start && until >= end) return 'All day';
+ return `${from < start ? '00:00' : timeLabel(event.starts_at)}–${until >= end ? '24:00' : timeLabel(event.ends_at)}`;
+}

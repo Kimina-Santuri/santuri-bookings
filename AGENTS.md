@@ -158,3 +158,10 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - The Staff dashboard Calendar & bookings tab is a single month calendar showing all non-cancelled bookings and blocked periods together. Each event includes its time, space, member or block source, and booking status. Staff can move between months and still use Block time + from this tab.
 - The shared calendar uses the existing public bookings and space_blocks records; no separate calendar table or external calendar is introduced.
+
+## Shared calendar fix and member view (local, 2026-09-16)
+
+- Fixed the invalid day-zero month boundary in the shared calendar; month navigation handles leap years and December rollover. Multi-day blocks appear on each overlapping Nairobi date.
+- `calendar.html` is linked as Shared calendar in every account sidebar and requires sign-in. Staff retain member details and Block time; other members see only spaces, times and statuses.
+- Apply `supabase/migrations/202609160003_shared_calendar.sql` before releasing the member view. Its authenticated-only function returns no member identities, notes, payments or block reasons and leaves existing table permissions intact.
+- The user approved pushing this change to the canonical GitHub `main` branch on 2026-09-17. The migration still must be applied to the connected Supabase project before the member view works in production.
