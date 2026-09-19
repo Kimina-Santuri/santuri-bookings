@@ -189,3 +189,11 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - Everything from this session (DJ Practice Room sync fix, notice-hours fix, NURA 19:00 extension, restored Bookings tab, week view) is committed and pushed to `main` (`23cb9a7`) and applied to the connected Supabase project. Nothing is pending application.
 - Two things flagged for a future pass, not urgent: (1) the Google Calendar sync-status table now visible again in the Bookings tab isn't actively monitored by anyone — worth an occasional glance, especially after direct edits to a space's Google Calendar; (2) the untested-scenario checklist in "Next release steps" item 4 above (cancellation/no-show/reminder emails, a Google all-day holiday block, weekly allowance reset, membership expiry, image upload) is still open from the original launch and hasn't been revisited.
+
+## Read-only Supabase MCP access (local, 2026-09-19)
+
+- A `supabase` MCP server (`@supabase/mcp-server-supabase`) is registered with `-s local` scope in `~/.claude.json` for this project only — it is not in `.mcp.json` and is not committed to the repo.
+- It runs with `--read-only --project-ref=gudbkpwxszdtirewawep`, so it can query tables (e.g. `calendar_connections`, `bookings`, `space_blocks`) directly for diagnostics but cannot write. This is separate from, and does not change, the existing DDL guardrail: schema/DDL changes still require the human to run them directly in the Supabase SQL editor.
+- Auth is a personal access token (account-scoped, not project-scoped) stored as the `SUPABASE_ACCESS_TOKEN` env var in that local MCP config. The token was pasted into a chat transcript during setup rather than entered via shell redirection as intended, so it should be treated as exposed; the user planned to rotate/reissue it at https://supabase.com/dashboard/account/tokens.
+- Purpose: let an assistant check live diagnostic state (like a booking space's `sync_error`/`synced_at`) without needing dashboard access or waiting on the user to relay UI screenshots.
+- New Claude Code sessions in this directory need to pick up the MCP server at session start; it was not live in the session that added it and required a restart to connect.
