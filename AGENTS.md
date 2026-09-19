@@ -105,7 +105,7 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 2. Deploy `email-notifications` with `--no-verify-jwt`, set its Zoho SMTP and shared-secret Edge Function secrets, and run `supabase/schedule-email-notifications.sql` with private placeholders replaced.
 3. Create a test client account and complete a full staging booking: submit a request, confirm it as staff, verify the Google event, record a payment, check the member balance and check request/confirmation emails.
 4. Test cancellation emails, completed/no-show messages, next-day reminders, a time occupied in Google, a Google all-day holiday block, weekly allowance reset, membership expiry and an image upload.
-5. Classroom and Creative Workstation calendars are now connected and syncing. Configure their confirmed opening schedules in the Staff dashboard and enable online booking only after those hours are agreed.
+5. Classroom and Creative Workstation calendars are connected and syncing, and both now show "Bookings open" in the Staff dashboard (observed 2026-09-19), so this step appears already done. Confirm with the team that their current opening schedules were the intentionally agreed ones, not just left at defaults.
 6. Review the privacy wording, data-retention process, backup plan, staff list and Sana studio allowance decision with the Santuri team.
 7. Only after staging checks pass, build the release, commit the approved files and publish through the existing GitHub/Sites process. Never commit service-account JSON, SMTP passwords or other secrets.
 
@@ -183,3 +183,9 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - The 2026-09-16 "Add shared staff calendar view" change replaced the staff tab that had Confirm/Cancel/Completed/No-show actions with a read-only month calendar, but only renamed the old code to `adminCalendarLegacy` instead of keeping it wired to a tab — it was dead code from that point on. This also silently removed the only UI showing Google Calendar connection/sync-error status per space.
 - Restored it as its own **Bookings** tab (`adminCalendarLegacy` renamed to `adminBookings`), positioned between Spaces and Calendar & bookings in `assets/js/account.js`. The shared month-view "Calendar & bookings" tab is unchanged and kept as a separate tab.
 - Verified with `npm run check`, `npm run build`, and the full test suite (25/25 pass); not click-tested live locally, since transplanting the live auth session to localhost for testing was blocked by a credential-handling guardrail (appropriately).
+- Follow-up same day: the Bookings tab filtered one day at a time, which made approving a backlog tedious. Changed it to filter by Nairobi week (Monday–Sunday, matching the existing weekly-allowance convention) with Previous/Next week navigation and a date column per row, since rows can now span multiple days. Committed and pushed as `23cb9a7`.
+
+## Session wrap-up (2026-09-19)
+
+- Everything from this session (DJ Practice Room sync fix, notice-hours fix, NURA 19:00 extension, restored Bookings tab, week view) is committed and pushed to `main` (`23cb9a7`) and applied to the connected Supabase project. Nothing is pending application.
+- Two things flagged for a future pass, not urgent: (1) the Google Calendar sync-status table now visible again in the Bookings tab isn't actively monitored by anyone — worth an occasional glance, especially after direct edits to a space's Google Calendar; (2) the untested-scenario checklist in "Next release steps" item 4 above (cancellation/no-show/reminder emails, a Google all-day holiday block, weekly allowance reset, membership expiry, image upload) is still open from the original launch and hasn't been revisited.
