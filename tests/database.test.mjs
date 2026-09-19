@@ -130,7 +130,7 @@ test('database enforces booking, payment and staff permissions',async t=>{
   assert.equal((await query("select count(*)::int as count from private.email_outbox where kind='role_assigned' and recipient='bob@example.test' and payload->>'role'='student'"))[0].count,1);
   await as(admin);
   const rooms=await query('select * from spaces order by slug');
-  for(const r of rooms)await rpc('save_space',[r.id,r.version,{...r,booking_enabled:true},Array.from({length:7},(_,weekday)=>({weekday,opens:'09:00',closes:'18:00'}))]);
+  for(const r of rooms)await rpc('save_space',[r.id,r.version,{...r,booking_enabled:true},Array.from({length:7},(_,weekday)=>({weekday,opens:'09:00',closes:['dj','classroom'].includes(r.slug)&&[5,6].includes(weekday)?'19:00':'18:00'}))]);
   await as(bob);assert.equal(await rpc('is_staff'),false);
   const ids=[];
   for(let i=0;i<rooms.length;i++){
@@ -177,7 +177,7 @@ test('database enforces booking, payment and staff permissions',async t=>{
   assert.equal((await query('select * from nura_slots($1,60)',[new Date(start).toISOString().slice(0,10)])).length,0);
   await rejects(()=>rpc('request_nura_booking',[start,60,'',randomUUID()]),/Friday and Saturday/);
   await rejects(()=>rpc('request_nura_booking',[new Date(new Date(friday).getTime()-3600000).toISOString(),60,'',randomUUID()]),/Friday and Saturday/);
-  await rejects(()=>rpc('request_nura_booking',[new Date(new Date(friday).getTime()+6*3600000).toISOString(),120,'',randomUUID()]),/Friday and Saturday/);
+  await rejects(()=>rpc('request_nura_booking',[new Date(new Date(friday).getTime()+7*3600000).toISOString(),120,'',randomUUID()]),/Friday and Saturday/);
   await rejects(()=>rpc('request_nura_booking',[friday,270,'',randomUUID()]),/Invalid/);
   const key=randomUUID(),first=await rpc('request_nura_booking',[friday,120,'Practice',key]);
   assert.equal(await rpc('request_nura_booking',[friday,120,'Practice',key]),first);

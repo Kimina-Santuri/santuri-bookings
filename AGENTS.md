@@ -44,7 +44,7 @@ This is a lightweight static booking and information website for Santuri East Af
 - Workstation capacity: one person
 - Staff are available to help.
 - Studio engineers can be arranged for 2,500 KES per hour.
-- NURA JCK runs regular CDJ practice sessions: Fridays in the DJ Practice Room and Saturdays from 11:00–18:00 in the Classroom.
+- NURA JCK runs regular CDJ practice sessions: Fridays in the DJ Practice Room and Saturdays from 11:00–19:00 in the Classroom.
 - Address: Santuri East Africa, Basement, The Mall, Chiromo Road / Ring Road Westlands, Nairobi, Kenya
 
 ## Membership program
@@ -121,7 +121,7 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - Confirmed temporary online-booking schedule: Recording Studio and DJ Practice Room are open Monday–Saturday, 09:00–18:00 EAT; Sunday is closed; maximum session length is four hours. Keep the minimum session and any future schedule changes configurable through the Staff dashboard.
 - Booking requests, staff approval/cancellation, password reset and the notification email flows have been tested successfully. Both `calendar-sync` and `email-notifications` are active in the linked Supabase project; treat their secrets and cron schedules as production configuration that must be checked before release.
 - The social-preview image is `assets/images/og.png`; it may be replaced by the team, ideally at a 1200×630 share-card ratio. The current replacement is 3386×1708 and may be cropped by social platforms.
-- The homepage space grid includes a clickable NURA x JCK card linking to `nura-jck.html`. Its dedicated page has matching Friday DJ Practice Room and Saturday Classroom booking buttons, with both sessions listed as 11:00–18:00. The buttons open the authenticated booking calendar with the relevant space selected.
+- The homepage space grid includes a clickable NURA x JCK card linking to `nura-jck.html`. Its dedicated page has matching Friday DJ Practice Room and Saturday Classroom booking buttons, with both sessions listed as 11:00–19:00. The buttons open the authenticated booking calendar with the relevant space selected.
 - Approved booking events synced to Google Calendar include the booker’s name and space in the event title; pending requests retain a `[Requested]` prefix. This is implemented in migration `202609090005_calendar_booking_names.sql` and the deployed `calendar-sync` function.
 
 ## Student access and NURA x JCK release (2026-09-12)
@@ -137,7 +137,7 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 ## NURA access — deployed (2026-09-16)
 
 - Staff can grant/remove NURA access in Members. It provides 240 shared minutes per Nairobi week, resetting Monday without carryover, independently of Student and paid-tier allowances. Existing Staff access remains unlimited.
-- NURA x JCK appears as a virtual booking card using `assets/images/nura.jpg`, linked via `book.html?space=nura`. Friday sessions reserve the existing DJ Practice Room; Saturday sessions reserve the existing Classroom, between 11:00 and 18:00 EAT. It does not create another physical space or calendar.
+- NURA x JCK appears as a virtual booking card using `assets/images/nura.jpg`, linked via `book.html?space=nura`. Friday sessions reserve the existing DJ Practice Room; Saturday sessions reserve the existing Classroom, between 11:00 and 19:00 EAT (extended from 18:00 on 2026-09-19). It does not create another physical space or calendar.
 - Migration `202609150001_nura_access.sql` enforces assignment, the weekly limit, weekday/time restrictions, and the physical room's availability and locking. Normal booking status, notification and calendar-sync paths apply. Cancellation releases hours; completed/no-show bookings consume them.
 - Migration `202609150001_nura_access.sql` has been applied to the connected Supabase project and the API schema refreshed. Existing room opening schedules, booking enablement and calendar health still control availability.
 - Verified with the connected staff account: Friday 2026-09-18 has 13 one-hour slots in the DJ Practice Room from 11:00–18:00 EAT; Saturday 2026-09-19 has 13 one-hour slots in the Classroom from 11:00–18:00 EAT. Later dates are also resolving through the NURA slot function.
@@ -165,3 +165,15 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - `calendar.html` is linked as Shared calendar in every account sidebar and requires sign-in. Staff retain member details and Block time; other members see only spaces, times and statuses.
 - Apply `supabase/migrations/202609160003_shared_calendar.sql` before releasing the member view. Its authenticated-only function returns no member identities, notes, payments or block reasons and leaves existing table permissions intact.
 - The user approved pushing this change to the canonical GitHub `main` branch on 2026-09-17. The migration still must be applied to the connected Supabase project before the member view works in production.
+
+## DJ Practice Room calendar sync conflict resolved (2026-09-19)
+
+- DJ Practice Room's Google Calendar connection carried a `sync_error` ("Google calendar overlaps an existing booking. Resolve the conflict.") that blocked all online bookings for that space on every date, not just the reported day. The conflicting Google Calendar event (Sept 18, 10:00–19:00, overlapping a confirmed booking) was removed on the Google side by the team; the next scheduled sync cleared the error automatically and the space is bookable again.
+- Also found and fixed: DJ Practice Room and Classroom both had `notice_hours` left at the default 24, even though only Recording Studio (studio allowance) and Creative Workstation (production allowance) are documented as needing 24 hours' notice. Since rooms only run 09:00–18:00 (now 09:00–19:00 on Fri/Sat for DJ Practice Room and Classroom, see below), a 24h window on a same-day-ish space wipes out all of "tomorrow" once it's past late afternoon. Lowered both to 2 hours via the staff Edit space form.
+
+## NURA hours extended to 19:00 (2026-09-19)
+
+- The team wants the 6pm start slot to be visible for NURA sessions; since sessions must end by close, the close time needed to move from 18:00 to 19:00 on Friday (DJ Practice Room) and Saturday (Classroom).
+- `supabase/migrations/202609190001_nura_extended_hours.sql` drops the `space_hours` table's hard `closes<=18:00` check constraint (found only at the DB schema level, not enforced client-side) and replaces it with `closes<=19:00`; updates `nura_slots` and `request_nura_booking` to allow sessions ending at 19:00; and updates the DJ Practice Room (Friday) and Classroom (Saturday) `space_hours` rows to close at 19:00.
+- This migration has **not** been applied yet — it requires DDL (altering a check constraint, replacing functions) which needs to be run directly in the Supabase SQL editor by a human; local automation is intentionally blocked from executing it. The team should review and run it, then update `assets/js/account.js`, `nura-jck.html`, `assets/js/catalog.js` (already edited locally to say 11:00–19:00 / 19:00 close) are ready to publish alongside.
+- Side effect to flag: because DJ Practice Room and Classroom share physical `space_hours` with regular (non-NURA) bookings, this also opens an 18:00–19:00 slot for ordinary member bookings on Fridays and Saturdays in those two rooms, not just NURA sessions.
