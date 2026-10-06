@@ -254,3 +254,6 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .nura-booking-actions{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}
 .nura-booking-actions .button{background:var(--ink);color:var(--white)}
 @media(max-width:760px){.nura-intro,.nura-details{grid-template-columns:1fr}.nura-schedule{grid-template-columns:1fr}.nura-booking-actions{flex-direction:column}.nura-booking-actions .button{justify-content:center;text-align:center}}
+.gear-grid>p{grid-column:1/-1;max-width:40rem}
+.gear-feature{margin:0;border-bottom:1px solid var(--line)}.gear-feature img{display:block;width:100%;aspect-ratio:21/8;object-fit:cover}
+@media(max-width:760px){.gear-feature img{aspect-ratio:4/3}}
