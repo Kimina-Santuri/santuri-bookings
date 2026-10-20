@@ -96,8 +96,8 @@ Replacing or disconnecting a resource calendar is deliberately not exposed as a 
 - Mwanzo: 60 production minutes/week; Midi: 240 production minutes and two two-hour studio sessions/week; Sana: 480 production minutes/week.
 - Sana's studio frequency is unconfirmed. No automatic studio allocation is created. Staff may grant a specifically approved number of sessions for a selected Monday-starting week, with a recorded reason.
 - Allowances refresh Monday at 00:00 Nairobi time and do not carry over. A session uses the allowance week in which it starts. A membership must cover the entire session.
-- Requested and confirmed bookings reserve allowance immediately. Completed and no-show sessions consume it. Eligible cancellations release it. Staff can override cancellation notice with a reason. Members cannot cancel within 12 hours.
-- Production/studio requests always require at least 24 hours, even if staff enter a shorter general notice period.
+- Requested and confirmed bookings reserve allowance immediately. Completed and no-show sessions consume it. Eligible cancellations release it. Staff can override cancellation notice with a reason. Members cannot cancel within 5 hours.
+- Booking notice comes from each space's Advance notice (hours) setting; spaces above 5 hours were lowered to 5 on 2026-10-20.
 - No-show and completion marking happens after a confirmed session ends. Requests require explicit team approval. Staff should review pending and elapsed bookings daily; requests do not expire automatically.
 - Non-allowance booking prices are calculated on the server from the hourly rate and eligible Midi/Sana discount. Existing bookings retain their price snapshot when a space rate changes.
 - Manual booking payments can be partial. Duplicate references and payments above the balance are rejected. Voiding a booking payment changes the ledger, not a bank/M-Pesa transaction; no refunds or money transfers happen here.

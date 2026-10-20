@@ -60,7 +60,7 @@ This is a lightweight static booking and information website for Santuri East Af
 - The Free Tier includes limited consultations, free Wi-Fi, shared table space, and communications about opportunities and volunteer roles through the alumni mailing list and WhatsApp group.
 - Payment uses Paybill 4054299 with the member's name in capital letters as the account reference. Activation happens in person after showing payment confirmation to the Santuri team.
 - Expired paid memberships revert to the Free Tier.
-- Production and studio bookings require at least 24 hours' notice through the Community Manager. Cancellations require at least 12 hours' notice; no-shows forfeit the relevant weekly hours.
+- Members can book and cancel up to 5 hours before a session (changed from 24 hours' booking and 12 hours' cancellation notice on 2026-10-20). No-shows forfeit the relevant weekly hours.
 
 ## Experience and content
 
@@ -229,3 +229,9 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - Rules: same space only (calendar-sync updates the event inside the current space's calendar, so moving rooms would orphan the old event; change rooms by cancel and rebook). NURA bookings stay on that room's NURA day, 11:00–19:00, up to 4 hours. Allowances are rechecked for the new week (the booking's own units are released when it stays in the same week); studio allowance stays 2 hours. Price is recalculated like `request_booking`; refused if recorded payments exceed the new price.
 - Side effects: bumps `private.calendar_jobs.revision` (the status trigger doesn't fire on time changes), deletes any pending `booking_reminder` so a new one is queued, upserts a `booking_rescheduled` email showing old and new times, and audit-logs `booking_rescheduled` with the reason and old/new times and prices.
 - `email-notifications` Edge Function redeployed (version 20, `--no-verify-jwt`) before the migration ran. Tests: `tests/reschedule.test.mjs`.
+
+## Five-hour booking and cancellation notice (2026-10-20)
+
+- `supabase/migrations/202610200001_five_hour_notice.sql` lowers member cancellation notice in `set_booking_status` from 12 to 5 hours, removes the hard 24-hour floor for production and studio spaces from `private.slot_ok`, lowers any space with `notice_hours` above 5 to 5, and sets the column default to 5. Spaces already below 5 hours (DJ Practice Room and Classroom at 2) keep their shorter notice. Staff can still change notice per space in Edit space.
+- The migration must be run in the Supabase SQL editor before the new copy in `account.js` and `membership.html` matches live behaviour. `supabase/setup.sql` was not updated; it is already behind later migrations.
+
