@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Artist Directory | Santuri East Africa</title>
+  <meta name="description" content="Find DJs, producers, sound engineers, vocalists and crew across Kenya's 47 counties, and contact them directly. Free, opt-in listings, never ranked.">
+  <link rel="canonical" href="https://bookings.santuri.org/directory.html">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#directory">Skip to directory</a>
+  <canvas id="topography" aria-hidden="true"></canvas>
+  <header class="site-header">
+    <a href="index.html" aria-label="Santuri East Africa bookings home"><img src="assets/images/logo.png" alt="Santuri East Africa" width="96" height="54"></a>
+    <nav aria-label="Primary navigation">
+      <a href="spaces.html">Spaces</a>
+      <a href="membership.html">Membership</a>
+      <a href="gear.html">Gear</a>
+      <a href="directory.html" aria-current="page">Directory</a>
+      <a href="index.html#visit">Visit</a>
+      <a class="account-nav-link" href="dashboard.html">My account</a><a class="nav-cta" href="account.html">Get listed</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="spaces-hero" aria-labelledby="directory-title">
+      <p class="eyebrow">Artist directory · Kenya</p>
+      <h1 id="directory-title">Who does what,<br>and where.</h1>
+      <p>DJs, producers, engineers, vocalists and crew across all 47 counties. Find who you need and contact them directly. Listing is free and opt-in, and people are shown in random order. Nobody is ranked.</p>
+      <div class="hero-actions"><a class="button" href="#directory">Find someone <span aria-hidden="true">↓</span></a><a class="text-link" href="#directory-join">Get listed</a></div>
+    </section>
+
+    <section class="spaces-section" id="directory" aria-labelledby="directory-list-title">
+      <p class="directory-demo" id="directory-demo" hidden>Sample data · local preview only. These are not real people.</p>
+      <div class="directory-layout">
+        <div class="directory-map-panel">
+          <div class="directory-map" id="directory-map"></div>
+          <div class="map-legend" aria-hidden="true"><span>None</span><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i><i data-level="5"></i><span>More</span></div>
+          <p class="map-hint">Tap a county to see who is there. Tap it again for all of Kenya.</p>
+        </div>
+        <div class="directory-results">
+          <p class="eyebrow">Who to book</p>
+          <h2 id="directory-list-title">Find your people.</h2>
+          <div class="role-filter" id="directory-roles" role="group" aria-label="What they do"></div>
+          <label class="directory-select">County<select id="directory-county"><option value="">All counties</option></select></label>
+          <p class="directory-count" id="directory-count" aria-live="polite"></p>
+          <div class="artist-grid" id="directory-list"><p class="directory-empty">Loading the directory…</p></div>
+          <button class="secondary-button directory-more" id="directory-more" type="button" hidden>Show more</button>
+          <noscript><p>Enable JavaScript to browse the directory.</p></noscript>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-section" id="directory-join" aria-labelledby="directory-join-title">
+      <div><p class="eyebrow">Free for everyone in Kenya</p><h2 id="directory-join-title">Put yourself<br>on the map.</h2></div>
+      <ol class="steps">
+        <li><b>01</b><div><h3>Create an account</h3><p>Sign up with your name, phone number and email. It takes a couple of minutes.</p></div></li>
+        <li><b>02</b><div><h3>Tick the directory box</h3><p>Choose your county and what you do. Your name, county, what you do and your phone number will be shown on this page.</p></div></li>
+        <li><b>03</b><div><h3>Get the call</h3><p>Bookers contact you directly; Santuri is not part of the conversation. Untick the box in your dashboard at any time to come off the directory.</p></div></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="main-footer">
+    <div class="footer-brand"><div class="footer-logo-wrap"><img src="assets/images/logo.png" alt="Santuri East Africa" width="110" height="110"></div><p>Creative spaces for East Africa’s music community.</p></div>
+    <nav class="footer-nav" aria-label="Footer navigation"><a href="index.html">Bookings</a><a href="spaces.html">Spaces</a><a href="membership.html">Membership</a><a href="gear.html">Gear rental</a><a href="directory.html">Artist directory</a><a href="index.html#visit">Contact</a><a href="booking-policy.html">Booking policy</a><a href="privacy.html#directory">Privacy</a></nav>
+    <div class="footer-bottom"><small>© <span id="year">2026</span> Santuri East Africa · County boundaries from <a href="https://www.geoboundaries.org">geoBoundaries</a> (CC BY 4.0)</small><a href="#top">Back to top ↑</a></div>
+  </footer>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/config.js"></script>
+  <script type="module" src="assets/js/directory.js"></script>
+</body>
+</html>
