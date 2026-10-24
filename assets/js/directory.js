@@ -6,6 +6,9 @@ import {viewBox,counties} from './kenya-counties.js';
 const map=document.querySelector('#directory-map'),list=document.querySelector('#directory-list'),summary=document.querySelector('#directory-count');
 const roleFilter=document.querySelector('#directory-roles'),countySelect=document.querySelector('#directory-county'),more=document.querySelector('#directory-more');
 const PAGE=24;
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const fullView=viewBox.split(' ').map(Number);
+let view=fullView.slice(),zooming=0;
 let artists=[],role='',county='',shown=PAGE;
 
 // Sample listings for a local preview (localhost with ?demo) so the map and filters can be checked before anyone signs up.
@@ -52,11 +55,26 @@ function drawList(){
 }
 function draw(){drawMap();drawRoles();drawList();}
 
-function setCounty(name){county=name;countySelect.value=name;shown=PAGE;draw();}
+// Zoom the map to the chosen county, with a margin so its neighbours stay in view.
+function zoomTarget(){
+ const path=county&&map.querySelector(`path[data-county="${CSS.escape(county)}"]`);if(!path)return fullView;
+ const b=path.getBBox(),size=Math.max(b.width,b.height*fullView[2]/fullView[3],fullView[2]*.04)*1.9;
+ const w=size,h=size*fullView[3]/fullView[2];
+ return [b.x+b.width/2-w/2,b.y+b.height/2-h/2,w,h];
+}
+function zoom(){
+ const svg=map.querySelector('svg'),from=view.slice(),to=zoomTarget(),run=++zooming,start=performance.now(),ms=reduceMotion.matches?0:450;
+ map.querySelector('.map-reset').hidden=!county;
+ const step=now=>{if(run!==zooming)return;const t=ms?Math.min(1,(now-start)/ms):1,k=1-Math.pow(1-t,3);
+  view=from.map((v,i)=>v+(to[i]-v)*k);svg.setAttribute('viewBox',view.join(' '));if(t<1)requestAnimationFrame(step);};
+ requestAnimationFrame(step);
+}
+function setCounty(name){county=name;countySelect.value=name;shown=PAGE;draw();zoom();}
 
 function init(){
- map.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya's counties, shaded by how many listed artists are in each. Use the county list to filter.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"><title></title></path>`).join('')}</svg>`;
- map.addEventListener('click',event=>{const p=event.target.closest('path');if(p)setCounty(p.dataset.county===county?'':p.dataset.county);});
+ map.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya's counties, shaded by how many listed artists are in each. Use the county list to filter.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"><title></title></path>`).join('')}</svg><button class="map-reset" type="button" hidden>All of Kenya ×</button>`;
+ map.querySelector('.map-reset').onclick=()=>setCounty('');
+ map.addEventListener('click',event=>{const p=event.target.closest('path[data-county]');if(p)setCounty(p.dataset.county===county?'':p.dataset.county);});
  countySelect.innerHTML='<option value="">All counties</option>'+COUNTIES.map(c=>`<option>${e(c)}</option>`).join('');
  countySelect.onchange=()=>setCounty(countySelect.value);
  roleFilter.addEventListener('click',event=>{const b=event.target.closest('[data-role]');if(!b)return;role=b.dataset.role;shown=PAGE;draw();});
