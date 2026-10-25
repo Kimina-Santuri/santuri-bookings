@@ -281,6 +281,7 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .directory-count{font:700 .72rem var(--mono);text-transform:uppercase;letter-spacing:.05em;margin:1.8rem 0 1rem;padding-bottom:.8rem;border-bottom:1px solid var(--line)}
 .artist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
 .artist-card{border:1px solid var(--line);background:var(--white);padding:1.2rem;display:flex;flex-direction:column;gap:.6rem;min-width:0}
+.artist-photo{display:block;width:calc(100% + 2.4rem);max-width:none;height:auto;aspect-ratio:1;object-fit:cover;margin:-1.2rem -1.2rem .2rem;background:#f0f0f0}
 .artist-card h3{margin:0;font-size:1.15rem;overflow-wrap:anywhere}.artist-county{margin:0;font:700 .66rem var(--mono);text-transform:uppercase;letter-spacing:.05em}
 .artist-tags{list-style:none;display:flex;flex-wrap:wrap;gap:.35rem;margin:0;padding:0}.artist-tags li{border:1px solid var(--line);padding:.2rem .45rem;font:600 .62rem var(--mono);text-transform:uppercase}
 .artist-contact{margin-top:auto;padding-top:.5rem;display:grid;gap:.45rem}.artist-contact .button{min-height:0;margin:0;background:var(--ink);color:var(--white);justify-content:center;padding:.75rem .8rem}.artist-contact .secondary-button{text-align:center;text-decoration:none}

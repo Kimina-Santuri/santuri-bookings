@@ -146,7 +146,8 @@ function init(){
 async function load(){
  if(demo){artists=sampleArtists();document.querySelector('#directory-demo').hidden=false;return;}
  if(!configured())throw Error('not configured');
- const db=await getClient();artists=(await result(db.rpc('artist_directory'))).map(a=>({...a,area:a.area||''}));
+ const db=await getClient(),photos=db.storage.from('directory-photos');
+ artists=(await result(db.rpc('artist_directory'))).map(a=>({...a,area:a.area||'',photo_url:a.photo?photos.getPublicUrl(a.photo).data.publicUrl:''}));
 }
 
 init();

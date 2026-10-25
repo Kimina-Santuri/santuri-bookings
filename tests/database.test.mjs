@@ -12,7 +12,7 @@ test('database enforces booking, payment and staff permissions',async t=>{
  grant usage on schema auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
  create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;
- grant usage on schema storage to authenticated;grant insert,select on storage.objects to authenticated;`);
+ grant usage on schema storage to authenticated;grant insert,select,delete on storage.objects to authenticated;`);
  for(const file of (await readdir('supabase/migrations')).sort())await db.exec(await readFile(`supabase/migrations/${file}`,'utf8'));
  await db.exec(await readFile('supabase/seed.sql','utf8'));
  const admin=randomUUID(),alice=randomUUID(),bob=randomUUID();
@@ -293,11 +293,29 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await rejects(()=>rpc('update_directory',[true,'Nakuru',['MC'],'','','','not-an-email']),/email/);
   await rejects(()=>rpc('update_directory',[true,'Nakuru',['MC'],'','dan','','','x'.repeat(81)]),/80 characters/);await rpc('update_directory',[true,'Nakuru',['MC','Lighting'],'Naivasha','@dan_mc','https://dan.example','','  MC Dan  ']);await db.exec('reset role');assert.deepEqual((await row(dan)).disciplines,['MC','Lighting']);assert.equal(await row(carol).then(r=>r.county),'');
   await as(null,'anon');await rejects(()=>rpc('update_directory',[true,'Nakuru',['MC']]),/permission denied/);
-  let listed=await query('select * from public.artist_directory()');assert.deepEqual(listed,[{full_name:'MC Dan',county:'Nakuru',area:'Naivasha',disciplines:['MC','Lighting'],instagram:'dan_mc',website:'https://dan.example',email:''}]);
+  let listed=await query('select * from public.artist_directory()');assert.deepEqual(listed,[{full_name:'MC Dan',county:'Nakuru',area:'Naivasha',disciplines:['MC','Lighting'],instagram:'dan_mc',website:'https://dan.example',email:'',photo:''}]);
   // No phone number is needed to be listed, and none is published.
   await db.exec('reset role');await query("update public.profiles set phone='' where id=$1",[carol]);
   await as(carol);await rpc('update_directory',[true,'Kisumu',['DJ'],'','','','carol@example.test']);await as(null,'anon');listed=await query('select * from public.artist_directory()');assert.equal(listed.length,2);assert.deepEqual(listed.map(x=>x.full_name).sort(),['Carol','MC Dan']);assert.ok(listed.every(x=>!('phone' in x)));
   await as(dan);await rpc('update_directory',[false,'',[]]);await as(carol);await rpc('update_directory',[false,'',[]]);await as(null,'anon');assert.equal((await query('select * from public.artist_directory()')).length,0);
+ });
+ await t.test('listing photos live in each member\'s own folder and leave with the listing',async()=>{
+  const erin=randomUUID(),fay=randomUUID();await db.exec('reset role');
+  for(const [id,name] of [[erin,'Erin'],[fay,'Fay']])await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[id,`${name.toLowerCase()}@example.test`,{full_name:name}]);
+  const mine=`${erin}/${randomUUID()}.webp`,theirs=`${fay}/${randomUUID()}.webp`;
+  await as(erin);await query("insert into storage.objects(bucket_id,name) values('directory-photos',$1)",[mine]);
+  await rejects(()=>query("insert into storage.objects(bucket_id,name) values('directory-photos',$1)",[theirs]),/row-level security/);
+  await as(fay);await query("insert into storage.objects(bucket_id,name) values('directory-photos',$1)",[theirs]);
+  assert.equal((await query("delete from storage.objects where name=$1 returning name",[mine])).length,0);
+  await as(erin);await rejects(()=>rpc('set_directory_photo',[theirs]),/could not be found/);
+  await rejects(()=>rpc('set_directory_photo',[`${erin}/${randomUUID()}.webp`]),/could not be found/);
+  await rejects(()=>rpc('set_directory_photo',[`${erin}/../${randomUUID()}.webp`]),/could not be found/);
+  await rpc('update_directory',[true,'Mombasa',['Vocalist'],'','erin']);await rpc('set_directory_photo',[mine]);
+  await as(null,'anon');await rejects(()=>rpc('set_directory_photo',['']),/permission denied/);
+  assert.equal((await query('select photo from public.artist_directory() where full_name=$1',['Erin']))[0].photo,mine);
+  await as(erin);await rpc('update_directory',[false,'',[]]);await db.exec('reset role');
+  assert.equal((await query('select directory_photo from public.profiles where id=$1',[erin]))[0].directory_photo,'');
+  await as(erin);assert.equal((await query("delete from storage.objects where name=$1 returning name",[mine])).length,1);
  });
  await db.close();
 });
