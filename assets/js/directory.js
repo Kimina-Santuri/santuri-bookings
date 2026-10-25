@@ -48,7 +48,7 @@ function drawMap(){
 
 // One twinkling dot per listed person, somewhere inside their area (once its outlines are loaded) or county.
 // Busier places twinkle faster. Above MAX_LIGHTS each light stands for several people, so cheap phones keep up.
-const MAX_LIGHTS=400,MAX_RIPPLES=80,RIPPLE_PX=26,spots=new Map();
+const MAX_LIGHTS=400,MAX_RIPPLES=80,RIPPLE_PX=44,spots=new Map();
 function seeded(text){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);
  return ()=>{h=h+0x6D2B79F5|0;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function spot(a){
