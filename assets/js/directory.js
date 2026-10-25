@@ -48,7 +48,7 @@ function drawMap(){
 
 // One twinkling dot per listed person, somewhere inside their area (once its outlines are loaded) or county.
 // Busier places twinkle faster. Above MAX_LIGHTS each light stands for several people, so cheap phones keep up.
-const MAX_LIGHTS=400,spots=new Map();
+const MAX_LIGHTS=400,MAX_RIPPLES=80,RIPPLE_PX=26,spots=new Map();
 function seeded(text){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);
  return ()=>{h=h+0x6D2B79F5|0;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function spot(a){
@@ -68,7 +68,21 @@ function drawLights(listed,tally,max){
  lights.innerHTML=listed.filter((_,i)=>i%per===0).map(a=>{const s=spot(a);if(!s)return '';
   const speed=4.2-2.8*Math.sqrt((tally.get(a.county)||0)/max);
   return `<path d="M${s[0].toFixed(1)} ${s[1].toFixed(1)}h.01" style="animation-duration:${speed.toFixed(2)}s;animation-delay:-${(s[2]*speed).toFixed(2)}s"/>`;}).join('');
+ lights.classList.toggle('is-zoomed',!!county);
+ drawRipples(listed.filter(a=>a.county===county&&(!area||a.area===area)));
  document.querySelector('#map-light-key').textContent=per>1?`Each dot is about ${per} people.`:'Each dot is one person.';
+}
+// Zoomed into a county, each dot there sends out radar rings. Their radius is set in map units for the zoom being
+// shown, so the rings come out about RIPPLE_PX wide on screen; the ring line itself doesn't scale.
+function drawRipples(here){
+ const svg=map.querySelector('svg');let ripples=svg.querySelector('.map-ripples');
+ if(!ripples){ripples=document.createElementNS(SVG,'g');ripples.classList.add('map-ripples');ripples.setAttribute('aria-hidden','true');}
+ svg.insertBefore(ripples,svg.querySelector('.map-lights'));
+ if(!county||reduceMotion.matches){ripples.innerHTML='';return;}
+ const r=(RIPPLE_PX*zoomTarget()[2]/(svg.getBoundingClientRect().width||500)).toFixed(2);
+ ripples.innerHTML=here.slice(0,MAX_RIPPLES).map(a=>{const s=spot(a);if(!s)return '';
+  // Two rings half a beat apart, each dot starting at its own point in the beat.
+  return [0,1.3].map(offset=>`<circle cx="${s[0].toFixed(1)}" cy="${s[1].toFixed(1)}" r="${r}" style="animation-delay:-${((s[2]*2.6+offset)%2.6).toFixed(2)}s"/>`).join('');}).join('');
 }
 function drawRoles(){
  const here=artists.filter(a=>byCounty(a)&&byArea(a));
