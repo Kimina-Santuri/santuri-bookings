@@ -262,12 +262,14 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .directory-demo{border:1px solid var(--ink);padding:.7rem 1rem;font:700 .7rem var(--mono);text-transform:uppercase;letter-spacing:.05em;margin:0 0 2rem}
 .directory-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(2rem,4vw,4.5rem);align-items:start}
 .directory-map-panel{position:sticky;top:6rem}
-.directory-map{position:relative;overflow:hidden}.directory-map svg{display:block;width:100%;height:auto;max-height:78vh;aspect-ratio:4000/5070}
+.directory-map{position:relative;overflow:hidden;background:var(--white)}.directory-map svg{display:block;width:100%;height:auto;max-height:78vh;aspect-ratio:4000/5070}
 .map-reset{position:absolute;top:.5rem;right:.5rem;border:1px solid var(--ink);background:var(--white);color:var(--ink);padding:.55rem .75rem;font:700 .66rem var(--mono);text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.map-reset[hidden]{display:none}.map-reset:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.directory-map path,.map-legend i{fill:var(--white);background:var(--white);stroke:#8c8c8c;stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round;cursor:pointer;transition:fill .2s}
-.directory-map path[data-level="1"],.map-legend i[data-level="1"]{fill:#d9d9d9;background:#d9d9d9}.directory-map path[data-level="2"],.map-legend i[data-level="2"]{fill:#a6a6a6;background:#a6a6a6}.directory-map path[data-level="3"],.map-legend i[data-level="3"]{fill:#737373;background:#737373}.directory-map path[data-level="4"],.map-legend i[data-level="4"]{fill:#404040;background:#404040}.directory-map path[data-level="5"],.map-legend i[data-level="5"]{fill:var(--ink);background:var(--ink)}
+.directory-map path{fill:var(--white);stroke:#8c8c8c;stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round;cursor:pointer;transition:fill .2s}
+.directory-map path[data-level="1"]{fill:#f7f7f7}.directory-map path[data-level="2"]{fill:#f0f0f0}.directory-map path[data-level="3"]{fill:#e8e8e8}.directory-map path[data-level="4"]{fill:#e0e0e0}.directory-map path[data-level="5"]{fill:#d6d6d6}
 .directory-map path:hover{stroke:var(--ink);stroke-width:2}.directory-map path.is-selected{stroke:var(--ink);stroke-width:3;paint-order:stroke}
-.map-legend{display:flex;align-items:center;gap:.25rem;margin-top:1rem;font:700 .62rem var(--mono);text-transform:uppercase;letter-spacing:.05em}.map-legend span{margin:0 .35rem}.map-legend i{display:block;width:1.6rem;height:.75rem;border:1px solid #8c8c8c;cursor:default}
+.directory-map .map-lights path{fill:none;stroke:var(--ink);stroke-width:4px;stroke-linecap:round;pointer-events:none;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.15}}
+.map-legend{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .5rem;margin:1rem 0 0;font:700 .62rem var(--mono);text-transform:uppercase;letter-spacing:.05em}.map-legend i{display:block;width:.6rem;height:.6rem;border-radius:50%;background:var(--ink)}
 .map-hint{font-size:.85rem;color:#555;margin:.6rem 0 0}
 .directory-results h2{margin-top:0}
 .role-filter{display:flex;flex-wrap:wrap;gap:.45rem;margin:1.5rem 0}
@@ -285,8 +287,8 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .directory-empty{grid-column:1/-1;margin:0}
 .directory-more{margin-top:1.5rem}
 .directory-map path.has-areas{fill:none;stroke:var(--ink);stroke-width:2;pointer-events:none}
-.directory-map .map-areas path{stroke:#8c8c8c}.directory-map .map-areas path.is-selected{stroke:var(--ink);stroke-width:3}
+.directory-map .map-areas path{stroke:#b3b3b3}.directory-map .map-areas path.is-selected{stroke:var(--ink);stroke-width:3}
 .map-labels text{font-family:var(--mono);font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:var(--ink);stroke:var(--white);stroke-width:.25em;paint-order:stroke;stroke-linejoin:round;pointer-events:none}
 .directory-filters{display:flex;flex-wrap:wrap;gap:1rem}.directory-filters .directory-select{flex:1 1 12rem}.directory-select[hidden]{display:none}
 @media(max-width:900px){.directory-layout{grid-template-columns:1fr}.directory-map-panel{position:static;max-width:520px}.directory-map svg{max-height:none}}
-@media(prefers-reduced-motion:reduce){.directory-map path{transition:none}}
+@media(prefers-reduced-motion:reduce){.directory-map path{transition:none}.directory-map .map-lights path{animation:none;opacity:.9}}

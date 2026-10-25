@@ -1,6 +1,6 @@
 import {getClient,configured,result} from './supabase-client.js';
 import {escapeHTML as e} from './booking-utils.js';
-import {COUNTIES,DISCIPLINES,AREAS,countySlug} from './directory-data.js';
+import {COUNTIES,DISCIPLINES,AREAS,countySlug,artistCard} from './directory-data.js';
 import {viewBox,counties} from './kenya-counties.js';
 
 const map=document.querySelector('#directory-map'),list=document.querySelector('#directory-list'),summary=document.querySelector('#directory-count');
@@ -21,15 +21,7 @@ function sampleArtists(){
  const weighted=[...Array(14).fill('Nairobi'),...Array(4).fill('Mombasa'),...Array(3).fill('Kisumu'),...Array(3).fill('Nakuru'),'Kiambu','Kiambu','Machakos','Uasin Gishu','Kilifi','Kajiado','Nyeri','Kakamega','Meru','Lamu','Turkana','Garissa'];
  return Array.from({length:70},(_,i)=>{const picks=new Set([DISCIPLINES[Math.floor(rand()*DISCIPLINES.length)]]);if(rand()>.6)picks.add(DISCIPLINES[Math.floor(rand()*DISCIPLINES.length)]);
   const c=weighted[Math.floor(rand()*weighted.length)],areas=AREAS[c]||[],a=rand()>.25?areas[Math.floor(rand()*Math.min(areas.length,c==='Nairobi'?8:areas.length))]||'':'';
-  return {full_name:`Sample artist ${String(i+1).padStart(2,'0')}`,county:c,area:a,disciplines:[...picks],phone:'0700 000 000'};});
-}
-
-function telLink(phone){return 'tel:'+phone.replace(/[^\d+]/g,'');}
-function whatsappLink(phone){
- let d=phone.replace(/\D/g,'');
- if(/^0[17]\d{8}$/.test(d))d='254'+d.slice(1);else if(/^[17]\d{8}$/.test(d))d='254'+d;
- if(/^254[17]\d{8}$/.test(d)||(phone.trim().startsWith('+')&&d.length>=8&&d.length<=15))return 'https://wa.me/'+d;
- return '';
+  return {full_name:`Sample artist ${String(i+1).padStart(2,'0')}`,county:c,area:a,disciplines:[...picks],instagram:`sample_artist_${i+1}`,website:rand()>.6?'https://example.com':'',email:rand()>.5?'artist@example.com':''};});
 }
 
 const byRole=a=>!role||a.disciplines.includes(role);
@@ -45,12 +37,38 @@ function drawMap(){
  map.querySelectorAll('path[data-county]').forEach(p=>{const name=p.dataset.county,n=tally.get(name)||0;
   p.dataset.level=level(n,max);p.classList.toggle('is-selected',name===county);
   p.querySelector('title').textContent=`${name}: ${people(n)}${role?' · '+role:''}`;});
+ drawLights(listed,tally,max);
  const group=map.querySelector('.map-areas');if(!group?.dataset.county)return;
  const local=new Map();for(const a of listed)if(a.county===group.dataset.county&&a.area)local.set(a.area,(local.get(a.area)||0)+1);
  const localMax=Math.max(1,...local.values());
  group.querySelectorAll('path[data-area]').forEach(p=>{const name=p.dataset.area,n=local.get(name)||0;
   p.dataset.level=level(n,localMax);p.classList.toggle('is-selected',name===area);
   p.querySelector('title').textContent=`${name}: ${people(n)}${role?' · '+role:''}`;});
+}
+
+// One twinkling dot per listed person, somewhere inside their area (once its outlines are loaded) or county.
+// Busier places twinkle faster. Above MAX_LIGHTS each light stands for several people, so cheap phones keep up.
+const MAX_LIGHTS=400,spots=new Map();
+function seeded(text){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);
+ return ()=>{h=h+0x6D2B79F5|0;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function spot(a){
+ const shape=(a.area&&map.querySelector(`.map-areas[data-county="${CSS.escape(a.county)}"] path[data-area="${CSS.escape(a.area)}"]`))||map.querySelector(`path[data-county="${CSS.escape(a.county)}"]`);
+ if(!shape)return null;
+ const key=[a.full_name,a.instagram,a.website,a.email,a.county,shape.dataset.area||''].join('|');if(spots.has(key))return spots.get(key);
+ // Same person, same spot on every visit: the position is seeded from who they are, not Math.random.
+ const rand=seeded(key),b=shape.getBBox(),pt=shape.ownerSVGElement.createSVGPoint();let found=[b.x+b.width/2,b.y+b.height/2];
+ for(let i=0;i<40;i++){pt.x=b.x+rand()*b.width;pt.y=b.y+rand()*b.height;if(shape.isPointInFill(pt)){found=[pt.x,pt.y];break;}}
+ found.push(rand());spots.set(key,found);return found;
+}
+function drawLights(listed,tally,max){
+ const svg=map.querySelector('svg');let lights=svg.querySelector('.map-lights');
+ if(!lights){lights=document.createElementNS(SVG,'g');lights.classList.add('map-lights');lights.setAttribute('aria-hidden','true');}
+ svg.insertBefore(lights,svg.querySelector('.map-labels'));
+ const per=Math.ceil(listed.length/MAX_LIGHTS)||1;
+ lights.innerHTML=listed.filter((_,i)=>i%per===0).map(a=>{const s=spot(a);if(!s)return '';
+  const speed=4.2-2.8*Math.sqrt((tally.get(a.county)||0)/max);
+  return `<path d="M${s[0].toFixed(1)} ${s[1].toFixed(1)}h.01" style="animation-duration:${speed.toFixed(2)}s;animation-delay:-${(s[2]*speed).toFixed(2)}s"/>`;}).join('');
+ document.querySelector('#map-light-key').textContent=per>1?`Each dot is about ${per} people.`:'Each dot is one person.';
 }
 function drawRoles(){
  const here=artists.filter(a=>byCounty(a)&&byArea(a));
@@ -60,16 +78,15 @@ function drawRoles(){
 function drawList(){
  const found=artists.filter(a=>byRole(a)&&byCounty(a)&&byArea(a));
  summary.textContent=`${people(found.length)} · ${role||'Everyone'} · ${area?area+', '+county:county||'All of Kenya'}`;
- list.innerHTML=found.length?found.slice(0,shown).map(a=>{const wa=whatsappLink(a.phone);
-  return `<article class="artist-card"><h3>${e(a.full_name)}</h3><p class="artist-county">${a.area?e(a.area)+' · ':''}${e(a.county)}</p><ul class="artist-tags">${a.disciplines.map(d=>`<li>${e(d)}</li>`).join('')}</ul><div class="artist-contact"><a class="button" href="${e(telLink(a.phone))}">Call ${e(a.phone)}</a>${wa?`<a class="secondary-button" href="${e(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>`:''}</div></article>`;}).join('')
-  :`<p class="directory-empty">No one listed ${area?'in '+e(area):county?'in '+e(county):'yet'}${role?' for '+e(role):''}. <a href="account.html">Create an account</a> to list yourself, or tell people you know.</p>`;
+ list.innerHTML=found.length?found.slice(0,shown).map(artistCard).join('')
+  :`<p class="directory-empty">No one listed ${area?'in '+e(area):county?'in '+e(county):'yet'}${role?' for '+e(role):''}. <a href="listing.html">List yourself</a>, or tell people you know.</p>`;
  more.hidden=found.length<=shown;
 }
 function draw(){drawMap();drawRoles();drawList();}
 
 // Constituencies of the open county are drawn over it, with their names, once its outline file has loaded.
 async function showAreas(name){
- const svg=map.querySelector('svg');map.querySelector('.map-areas')?.remove();
+ const svg=map.querySelector('svg');map.querySelector('.map-areas')?.remove();map.querySelector('.map-labels')?.remove();
  svg.querySelectorAll('path[data-county]').forEach(p=>p.classList.toggle('has-areas',false));
  if(!name)return;
  if(!areaShapes.has(name))areaShapes.set(name,fetch(`assets/data/areas/${countySlug(name)}.json`).then(r=>r.ok?r.json():null).catch(()=>null));
@@ -86,7 +103,7 @@ async function showAreas(name){
   if(w>b.width*1.05||h>b.height*.8||placed.some(o=>box[0]<o[0]+o[2]&&o[0]<box[0]+w&&box[1]<o[1]+o[3]&&o[1]<box[1]+h))return;
   placed.push(box);const t=document.createElementNS(SVG,'text');
   t.setAttribute('x',b.x+b.width/2);t.setAttribute('y',b.y+b.height/2);t.setAttribute('font-size',size);t.textContent=p.dataset.area;labels.append(t);});
- group.append(labels);drawMap();
+ svg.append(labels);drawMap();
 }
 
 // Zoom to the chosen county so its areas fill the map, or to the chosen area with a margin so its neighbours stay in view.
@@ -112,7 +129,7 @@ function setCounty(name){const changed=name!==county;county=name;area='';countyS
 function setArea(name){area=name;areaSelect.value=name;shown=PAGE;draw();zoom();}
 
 function init(){
- map.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya's counties, shaded by how many listed artists are in each. Use the county and area lists to filter.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"><title></title></path>`).join('')}</svg><button class="map-reset" type="button" hidden>All of Kenya ×</button>`;
+ map.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya's counties, with one dot for each listed person. Use the county and area lists to filter.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"><title></title></path>`).join('')}</svg><button class="map-reset" type="button" hidden>All of Kenya ×</button>`;
  map.querySelector('.map-reset').onclick=()=>area?setArea(''):setCounty('');
  map.addEventListener('click',event=>{
   const a=event.target.closest('path[data-area]');if(a){setArea(a.dataset.area===area?'':a.dataset.area);return;}
