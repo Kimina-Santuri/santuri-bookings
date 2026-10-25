@@ -42,13 +42,13 @@
         <div class="directory-map-panel">
           <div class="directory-map" id="directory-map"></div>
           <div class="map-legend" aria-hidden="true"><span>None</span><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i><i data-level="5"></i><span>More</span></div>
-          <p class="map-hint">Tap a county to zoom in and see who is there. Tap it again, or All of Kenya, to zoom out.</p>
+          <p class="map-hint">Tap a county to zoom in, then tap an area such as Westlands or Thika Town. The button in the corner zooms back out.</p>
         </div>
         <div class="directory-results">
           <p class="eyebrow">Who to book</p>
           <h2 id="directory-list-title">Find your people.</h2>
           <div class="role-filter" id="directory-roles" role="group" aria-label="What they do"></div>
-          <label class="directory-select">County<select id="directory-county"><option value="">All counties</option></select></label>
+          <div class="directory-filters"><label class="directory-select">County<select id="directory-county"><option value="">All counties</option></select></label><label class="directory-select" hidden>Area<select id="directory-area"></select></label></div>
           <p class="directory-count" id="directory-count" aria-live="polite"></p>
           <div class="artist-grid" id="directory-list"><p class="directory-empty">Loading the directory…</p></div>
           <button class="secondary-button directory-more" id="directory-more" type="button" hidden>Show more</button>
@@ -70,7 +70,7 @@
   <footer class="main-footer">
     <div class="footer-brand"><div class="footer-logo-wrap"><img src="assets/images/logo.png" alt="Santuri East Africa" width="110" height="110"></div><p>Creative spaces for East Africa’s music community.</p></div>
     <nav class="footer-nav" aria-label="Footer navigation"><a href="index.html">Bookings</a><a href="spaces.html">Spaces</a><a href="membership.html">Membership</a><a href="gear.html">Gear rental</a><a href="directory.html">Artist directory</a><a href="index.html#visit">Contact</a><a href="booking-policy.html">Booking policy</a><a href="privacy.html#directory">Privacy</a></nav>
-    <div class="footer-bottom"><small>© <span id="year">2026</span> Santuri East Africa · County boundaries from <a href="https://www.geoboundaries.org">geoBoundaries</a> (CC BY 4.0)</small><a href="#top">Back to top ↑</a></div>
+    <div class="footer-bottom"><small>© <span id="year">2026</span> Santuri East Africa · Boundaries from <a href="https://www.geoboundaries.org">geoBoundaries</a> (counties CC BY 4.0; constituencies IEBC, CC BY 3.0 IGO)</small><a href="#top">Back to top ↑</a></div>
   </footer>
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/config.js"></script>

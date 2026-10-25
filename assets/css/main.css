@@ -284,5 +284,9 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .artist-contact{margin-top:auto;padding-top:.5rem;display:grid;gap:.45rem}.artist-contact .button{min-height:0;margin:0;background:var(--ink);color:var(--white);justify-content:center;padding:.75rem .8rem}.artist-contact .secondary-button{text-align:center;text-decoration:none}
 .directory-empty{grid-column:1/-1;margin:0}
 .directory-more{margin-top:1.5rem}
+.directory-map path.has-areas{fill:none;stroke:var(--ink);stroke-width:2;pointer-events:none}
+.directory-map .map-areas path{stroke:#8c8c8c}.directory-map .map-areas path.is-selected{stroke:var(--ink);stroke-width:3}
+.map-labels text{font-family:var(--mono);font-weight:700;text-anchor:middle;dominant-baseline:middle;fill:var(--ink);stroke:var(--white);stroke-width:.25em;paint-order:stroke;stroke-linejoin:round;pointer-events:none}
+.directory-filters{display:flex;flex-wrap:wrap;gap:1rem}.directory-filters .directory-select{flex:1 1 12rem}.directory-select[hidden]{display:none}
 @media(max-width:900px){.directory-layout{grid-template-columns:1fr}.directory-map-panel{position:static;max-width:520px}.directory-map svg{max-height:none}}
 @media(prefers-reduced-motion:reduce){.directory-map path{transition:none}}

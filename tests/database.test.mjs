@@ -276,17 +276,17 @@ test('database enforces booking, payment and staff permissions',async t=>{
  });
  await t.test('artist directory listing is opt-in and can be withdrawn',async()=>{
   const carol=randomUUID(),dan=randomUUID();await db.exec('reset role');
-  await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[carol,'carol@example.test',{full_name:'Carol',directory_consent:true,county:'Kisumu',disciplines:['DJ','Producer']}]);
+  await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[carol,'carol@example.test',{full_name:'Carol',directory_consent:true,county:'Kisumu',area:'Kisumu Central',disciplines:['DJ','Producer']}]);
   await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[dan,'dan@example.test',{full_name:'Dan',phone:'0712 345 678',county:'Nakuru',disciplines:['MC']}]);
-  const row=async id=>(await query('select directory_consent_at,county,disciplines from public.profiles where id=$1',[id]))[0];
-  let c=await row(carol);assert.ok(c.directory_consent_at);assert.equal(c.county,'Kisumu');assert.deepEqual(c.disciplines,['DJ','Producer']);
+  const row=async id=>(await query('select directory_consent_at,county,area,disciplines from public.profiles where id=$1',[id]))[0];
+  let c=await row(carol);assert.ok(c.directory_consent_at);assert.equal(c.county,'Kisumu');assert.equal(c.area,'Kisumu Central');assert.deepEqual(c.disciplines,['DJ','Producer']);
   const d=await row(dan);assert.equal(d.directory_consent_at,null);assert.equal(d.county,'');assert.deepEqual(d.disciplines,[]);
   await as(carol);await rejects(()=>query("update public.profiles set directory_consent_at=now()"),/permission denied/);
   await rejects(()=>rpc('update_directory',[true,'',['DJ']]),/county/);await rejects(()=>rpc('update_directory',[true,'Kisumu',[]]),/county/);
-  await rpc('update_directory',[false,'Kisumu',['DJ']]);await db.exec('reset role');c=await row(carol);assert.equal(c.directory_consent_at,null);assert.equal(c.county,'');assert.deepEqual(c.disciplines,[]);
-  await as(dan);await rpc('update_directory',[true,'Nakuru',['MC','Lighting']]);await db.exec('reset role');assert.deepEqual((await row(dan)).disciplines,['MC','Lighting']);assert.equal(await row(carol).then(r=>r.county),'');
+  await rpc('update_directory',[false,'Kisumu',['DJ']]);await db.exec('reset role');c=await row(carol);assert.equal(c.directory_consent_at,null);assert.equal(c.county,'');assert.equal(c.area,'');assert.deepEqual(c.disciplines,[]);
+  await as(dan);await rejects(()=>rpc('update_directory',[true,'Nakuru',['MC'],'x'.repeat(61)]),/area/);await rpc('update_directory',[true,'Nakuru',['MC','Lighting'],'Naivasha']);await db.exec('reset role');assert.deepEqual((await row(dan)).disciplines,['MC','Lighting']);assert.equal(await row(carol).then(r=>r.county),'');
   await as(null,'anon');await rejects(()=>rpc('update_directory',[true,'Nakuru',['MC']]),/permission denied/);
-  let listed=await query('select * from public.artist_directory()');assert.deepEqual(listed,[{full_name:'Dan',county:'Nakuru',disciplines:['MC','Lighting'],phone:'0712 345 678'}]);
+  let listed=await query('select * from public.artist_directory()');assert.deepEqual(listed,[{full_name:'Dan',county:'Nakuru',area:'Naivasha',disciplines:['MC','Lighting'],phone:'0712 345 678'}]);
   await as(carol);await rejects(()=>rpc('update_directory',[true,'Kisumu',['DJ']]),/phone number/);
   await as(dan);await rpc('update_directory',[false,'',[]]);await as(null,'anon');assert.equal((await query('select * from public.artist_directory()')).length,0);
  });
