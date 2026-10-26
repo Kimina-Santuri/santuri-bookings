@@ -329,3 +329,12 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - At the user's request, the "From idea to room in three steps" section (`.how-section#how`) was removed from `index.html` and placed in `spaces.html`, before the house rules. The landing page now runs hero › explore › spaces › membership › gear › directory › visit. The "How it works" links in the landing header and footer and in `nura-jck.html` now go to `spaces.html#how` (on `spaces.html` itself, `#how`). `catalog.js` still rewrites step two's wording, now on the Spaces page. The gear and directory pages keep their own step sections.
 - Released 2026-10-26 with the user's approval.
+
+## Hero map tour (2026-10-26)
+
+- `tour()` in `assets/js/home.js`: 2.5 s after the map draws, it picks a random listed person (so busier counties come up more often), glides the viewBox to their county over 1.8 s (cubic ease, framed at 1.6× the county's bounds, at least 6% of Kenya's width, at the map's own aspect ratio), shows a "County · N artists" label (`.hero-map-now`), enlarges the dots (`.map-lights.is-zoomed`), holds 3.5 s, glides back out to all of Kenya, then rests 4–8 s.
+- It waits while the map is off screen (IntersectionObserver), the tab is hidden, or the pointer is over the map, so people can read it and phones don't burn battery. It doesn't run with reduced motion or when nobody is listed.
+- The Santuri square and ring are resized every frame by `place(view)`, so they stay 13 px and 60 px on screen at any zoom (also on window resize).
+- Hero dots are placed by county only (no constituency outlines on the landing page), so a listing with an area may sit elsewhere in its county on the hero than on the directory map.
+- Checked in headless Chrome against live data: 1× → 10.4× on Nairobi and back, marker sizes constant, holds under the pointer, stays still with reduced motion, no console errors.
+- Released 2026-10-26 with the user's approval.

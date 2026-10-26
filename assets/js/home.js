@@ -26,14 +26,47 @@ async function gear(db){
 // Kenya with one twinkling dot per listed person and a radar ring on Santuri. The outlines load after the page text.
 async function drawMap(listed){
  const {viewBox,counties}=await import('./kenya-counties.js');
- heroMap.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya with one dot for each artist in the Santuri directory and a ring marking Santuri in Westlands, Nairobi.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"></path>`).join('')}</svg>`;
+ heroMap.innerHTML=`<svg viewBox="${viewBox}" role="img" aria-label="Map of Kenya with one dot for each artist in the Santuri directory and a ring marking Santuri in Westlands, Nairobi.">${counties.map(([name,d])=>`<path d="${d}" data-county="${e(name)}"></path>`).join('')}</svg><p class="hero-map-now" aria-hidden="true"></p>`;
  const svg=heroMap.querySelector('svg'),tally=new Map();for(const a of listed)tally.set(a.county,(tally.get(a.county)||0)+1);
  const max=Math.max(1,...tally.values()),per=Math.ceil(listed.length/MAX_DOTS)||1;
  const shape=a=>svg.querySelector(`path[data-county="${CSS.escape(a.county)}"]`);
  const dots=listed.filter((_,i)=>i%per===0).map(a=>{const p=shape(a);return p?dot(spotIn(p,a),twinkle(tally.get(a.county)||0,max)):'';}).join('');
- // Sizes in map units for how wide the map is drawn. Santuri is a hollow square under the dots, so artists there stay visible.
- const unit=Number(viewBox.split(' ')[2])/(svg.getBoundingClientRect().width||400),r=(RING_PX*unit).toFixed(1),m=MARK_PX*unit,[x,y]=SANTURI;
- svg.insertAdjacentHTML('beforeend',`${reduceMotion.matches?'':`<g class="map-ripples" aria-hidden="true">${[0,1.3].map(d=>`<circle cx="${x}" cy="${y}" r="${r}" style="animation-delay:-${d}s"/>`).join('')}</g>`}<rect class="map-santuri" x="${(x-m/2).toFixed(1)}" y="${(y-m/2).toFixed(1)}" width="${m.toFixed(1)}" height="${m.toFixed(1)}" aria-hidden="true"/><g class="map-lights" aria-hidden="true">${dots}</g>`);
+ // Santuri is a hollow square under the dots, so artists there stay visible.
+ const [x,y]=SANTURI;
+ svg.insertAdjacentHTML('beforeend',`${reduceMotion.matches?'':`<g class="map-ripples" aria-hidden="true">${[0,1.3].map(d=>`<circle cx="${x}" cy="${y}" style="animation-delay:-${d}s"/>`).join('')}</g>`}<rect class="map-santuri" aria-hidden="true"/><g class="map-lights" aria-hidden="true">${dots}</g>`);
+ const full=viewBox.split(' ').map(Number),ring=svg.querySelectorAll('.map-ripples circle'),mark=svg.querySelector('.map-santuri');
+ // Keep the marker and its ring the same size on screen at any zoom: sizes are in map units for the view being shown.
+ const place=view=>{const unit=view[2]/(svg.getBoundingClientRect().width||400),m=MARK_PX*unit;
+  ring.forEach(c=>c.setAttribute('r',(RING_PX*unit).toFixed(1)));
+  mark.setAttribute('x',(x-m/2).toFixed(1));mark.setAttribute('y',(y-m/2).toFixed(1));mark.setAttribute('width',m.toFixed(1));mark.setAttribute('height',m.toFixed(1));};
+ place(full);tour(svg,listed,tally,full,place);
+}
+
+// Every so often the map glides in on the county of a randomly chosen artist (so busier counties come up more often),
+// holds, then glides back out to all of Kenya. It waits while the map is off screen, the tab is hidden or the pointer
+// is over the map, and doesn't run at all with reduced motion or nobody listed.
+function tour(svg,listed,tally,full,place){
+ let view=full.slice();addEventListener('resize',()=>place(view));
+ if(reduceMotion.matches||!listed.length)return;
+ const label=heroMap.querySelector('.hero-map-now'),lights=svg.querySelector('.map-lights');let visible=true,held=false;
+ new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;}).observe(svg);
+ heroMap.addEventListener('pointerenter',()=>{held=true;});heroMap.addEventListener('pointerleave',()=>{held=false;});
+ const wait=ms=>new Promise(done=>setTimeout(done,ms));
+ const ready=async()=>{while(!visible||held||document.hidden)await wait(400);};
+ const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+ const show=v=>{view=v;svg.setAttribute('viewBox',v.map(n=>n.toFixed(1)).join(' '));place(v);};
+ const glide=(to,ms)=>new Promise(done=>{const from=view.slice(),start=performance.now();
+  const step=now=>{const k=ease(Math.min(1,(now-start)/ms));show(from.map((v,i)=>v+(to[i]-v)*k));if(k<1)requestAnimationFrame(step);else done();};requestAnimationFrame(step);});
+ // Frame the county with room around it, at the map's own shape; small counties like Nairobi get a minimum size.
+ const frame=name=>{const b=svg.querySelector(`path[data-county="${CSS.escape(name)}"]`).getBBox(),w=Math.max(b.width,b.height*full[2]/full[3],full[2]*.06)*1.6,h=w*full[3]/full[2];
+  return [b.x+b.width/2-w/2,b.y+b.height/2-h/2,w,h];};
+ (async()=>{await wait(2500);
+  for(;;){await ready();
+   const {county}=listed[Math.floor(Math.random()*listed.length)],n=tally.get(county)||0;
+   label.textContent=`${county} · ${n} ${n===1?'artist':'artists'}`;label.classList.add('is-on');lights.classList.add('is-zoomed');
+   await glide(frame(county),1800);await wait(3500);await ready();
+   label.classList.remove('is-on');lights.classList.remove('is-zoomed');await glide(full,1800);await wait(4000+Math.random()*4000);}
+ })();
 }
 
 // A live count and three listings in random order (the directory is never ranked).

@@ -324,4 +324,7 @@ dialog::backdrop{background:#0c0d0bd9;backdrop-filter:blur(3px)}
 .open-next a{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none}.open-next a:hover span,.open-next a:focus-visible span{text-decoration:underline}
 .open-next b{font:700 .7rem var(--mono);text-transform:uppercase;white-space:nowrap}
 @media(max-width:900px){.hero{grid-template-columns:1fr;grid-template-areas:"text" "map" "facts"}.hero-map .directory-map{max-width:24rem}}
+.hero-map .directory-map{position:relative}
+.hero-map-now{position:absolute;top:.4rem;left:0;margin:0;padding:.35rem .55rem;background:var(--white);border:1px solid var(--ink);font:700 .62rem var(--mono);text-transform:uppercase;letter-spacing:.05em;opacity:0;transform:translateY(-4px);transition:opacity .4s,transform .4s;pointer-events:none}
+.hero-map-now.is-on{opacity:1;transform:none}
 
