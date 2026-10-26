@@ -43,29 +43,47 @@ async function drawMap(listed){
 }
 
 // Every so often the map glides in on the county of a randomly chosen artist (so busier counties come up more often),
-// holds, then glides back out to all of Kenya. It waits while the map is off screen, the tab is hidden or the pointer
-// is over the map, and doesn't run at all with reduced motion or nobody listed.
+// holds, then glides back out to all of Kenya. Once in a while it first pulls out to the world, centred on Africa, then
+// dives back in. It waits while the map is off screen, the tab is hidden or the pointer is over the map, and doesn't run
+// at all with reduced motion or nobody listed.
+const WORLD_CENTRE=[-6957,-1292],WORLD_WIDTH=56000; // lon 20°E, lat 8°N, about 112° of longitude across, in map units
 function tour(svg,listed,tally,full,place){
  let view=full.slice();addEventListener('resize',()=>place(view));
  if(reduceMotion.matches||!listed.length)return;
- const label=heroMap.querySelector('.hero-map-now'),lights=svg.querySelector('.map-lights');let visible=true,held=false;
+ const label=heroMap.querySelector('.hero-map-now'),lights=svg.querySelector('.map-lights');let visible=true,held=false,world=null;
  new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;}).observe(svg);
  heroMap.addEventListener('pointerenter',()=>{held=true;});heroMap.addEventListener('pointerleave',()=>{held=false;});
  const wait=ms=>new Promise(done=>setTimeout(done,ms));
  const ready=async()=>{while(!visible||held||document.hidden)await wait(400);};
  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const show=v=>{view=v;svg.setAttribute('viewBox',v.map(n=>n.toFixed(1)).join(' '));place(v);};
- const glide=(to,ms)=>new Promise(done=>{const from=view.slice(),start=performance.now();
-  const step=now=>{const k=ease(Math.min(1,(now-start)/ms));show(from.map((v,i)=>v+(to[i]-v)*k));if(k<1)requestAnimationFrame(step);else done();};requestAnimationFrame(step);});
+ const aspect=full[3]/full[2],box=(cx,cy,w)=>[cx-w/2,cy-w*aspect/2,w,w*aspect];
+ // Width changes geometrically and the centre moves with the zoom, so a world-to-county dive feels as steady as a short one.
+ const glide=(to,ms)=>new Promise(done=>{const w0=view[2],w1=to[2],c0=[view[0]+w0/2,view[1]+view[3]/2],c1=[to[0]+w1/2,to[1]+to[3]/2],start=performance.now();
+  const step=now=>{const k=ease(Math.min(1,(now-start)/ms)),w=w0*Math.pow(w1/w0,k),p=Math.abs(w1-w0)<1?k:(w0-w)/(w0-w1);
+   show(box(c0[0]+(c1[0]-c0[0])*p,c0[1]+(c1[1]-c0[1])*p,w));if(k<1)requestAnimationFrame(step);else done();};requestAnimationFrame(step);});
  // Frame the county with room around it, at the map's own shape; small counties like Nairobi get a minimum size.
- const frame=name=>{const b=svg.querySelector(`path[data-county="${CSS.escape(name)}"]`).getBBox(),w=Math.max(b.width,b.height*full[2]/full[3],full[2]*.06)*1.6,h=w*full[3]/full[2];
-  return [b.x+b.width/2-w/2,b.y+b.height/2-h/2,w,h];};
+ const frame=name=>{const b=svg.querySelector(`path[data-county="${CSS.escape(name)}"]`).getBBox();
+  return box(b.x+b.width/2,b.y+b.height/2,Math.max(b.width,b.height/aspect,full[2]*.06)*1.6);};
+ // World coastlines (Natural Earth, ~6 KB gzipped), fetched the first time the tour goes global and drawn under Kenya.
+ const loadWorld=async()=>{if(!world)world=fetch('assets/data/world.json').then(r=>r.ok?r.json():null).then(w=>{if(!w)return false;
+   const path=document.createElementNS(SVG,'path');path.classList.add('map-world');path.setAttribute('d',w.d);path.setAttribute('transform',w.transform);path.setAttribute('aria-hidden','true');
+   svg.prepend(path);return true;}).catch(()=>false);return world;};
+ const say=(text)=>{label.textContent=text;label.classList.add('is-on');};
+ const people=n=>`${n} ${n===1?'artist':'artists'}`;
  (async()=>{await wait(2500);
-  for(;;){await ready();
-   const {county}=listed[Math.floor(Math.random()*listed.length)],n=tally.get(county)||0;
-   label.textContent=`${county} · ${n} ${n===1?'artist':'artists'}`;label.classList.add('is-on');lights.classList.add('is-zoomed');
-   await glide(frame(county),1800);await wait(3500);await ready();
-   label.classList.remove('is-on');lights.classList.remove('is-zoomed');await glide(full,1800);await wait(4000+Math.random()*4000);}
+  for(let cycle=0;;cycle++){await ready();
+   const {county}=listed[Math.floor(Math.random()*listed.length)];
+   if(cycle>0&&Math.random()<.35&&await loadWorld()){
+    say(`Kenya · ${people(listed.length)}`);svg.classList.add('show-world','is-global');
+    await glide(box(...WORLD_CENTRE,WORLD_WIDTH),4200);await wait(3000);await ready();
+    svg.classList.remove('is-global');say(`${county} · ${people(tally.get(county)||0)}`);lights.classList.add('is-zoomed');
+    await glide(frame(county),5600);svg.classList.remove('show-world');
+   }else{
+    say(`${county} · ${people(tally.get(county)||0)}`);lights.classList.add('is-zoomed');await glide(frame(county),3200);
+   }
+   await wait(4000);await ready();
+   label.classList.remove('is-on');lights.classList.remove('is-zoomed');await glide(full,3200);await wait(4000+Math.random()*4000);}
  })();
 }
 

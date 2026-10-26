@@ -332,9 +332,19 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 ## Hero map tour (2026-10-26)
 
-- `tour()` in `assets/js/home.js`: 2.5 s after the map draws, it picks a random listed person (so busier counties come up more often), glides the viewBox to their county over 1.8 s (cubic ease, framed at 1.6× the county's bounds, at least 6% of Kenya's width, at the map's own aspect ratio), shows a "County · N artists" label (`.hero-map-now`), enlarges the dots (`.map-lights.is-zoomed`), holds 3.5 s, glides back out to all of Kenya, then rests 4–8 s.
+- `tour()` in `assets/js/home.js`: 2.5 s after the map draws, it picks a random listed person (so busier counties come up more often), glides the viewBox to their county over 3.2 s (slowed from 1.8 s at the user's request) (cubic ease, framed at 1.6× the county's bounds, at least 6% of Kenya's width, at the map's own aspect ratio), shows a "County · N artists" label (`.hero-map-now`), enlarges the dots (`.map-lights.is-zoomed`), holds 4 s, glides back out to all of Kenya, then rests 4–8 s.
 - It waits while the map is off screen (IntersectionObserver), the tab is hidden, or the pointer is over the map, so people can read it and phones don't burn battery. It doesn't run with reduced motion or when nobody is listed.
 - The Santuri square and ring are resized every frame by `place(view)`, so they stay 13 px and 60 px on screen at any zoom (also on window resize).
 - Hero dots are placed by county only (no constituency outlines on the landing page), so a listing with an area may sit elsewhere in its county on the hero than on the directory map.
 - Checked in headless Chrome against live data: 1× → 10.4× on Nairobi and back, marker sizes constant, holds under the pointer, stays still with reduced motion, no console errors.
+- Released 2026-10-26 with the user's approval.
+- The hero map has a thin border (`--line`, 1px) with a little padding; the tour label sits inside it.
+
+## Hero tour: slower, framed, and a global moment (2026-10-26)
+
+- Glides now take 3.2 s, and the world dive takes 5.6 s. All glides change the view's width geometrically (log-scale zoom), and the centre moves in step with the zoom, so a world-to-county dive looks as steady as a short one.
+- Once in a while (35% of cycles, never the first), the tour pulls out to the world centred on Africa (lon 20°E, lat 8°N, 112° of longitude across: Africa, Europe and the Middle East in the portrait frame), labelled "Kenya · N artists". Kenya turns solid black with white dots (`svg.is-global`), and the Santuri square fades out (its ring stays). After 3 s it dives straight into an artist's county, and the world layer fades out (`svg.show-world`).
+- World coastlines: `assets/data/world.json` (16.5 KB, 6.3 KB gzipped), fetched only the first time the tour goes global and drawn under the counties as `.map-world`. It is built by `scripts/world-outline.mjs` from world-atlas@2.0.2 `land-110m.json` (Natural Earth, public domain; the package is ISC), cropped to lon −60…100 and lat −70…85, rounded to 0.1°, with specks under 0.4 square degrees dropped, and split where outlines cross the 180° meridian (otherwise Fiji drew a line right round the map). It uses the Kenya map's fitted projection, plate carrée at 500.2 units per degree (`x=(lon−33.909)·500.2`, `y=(5.416−lat)·500.2`); Kenya's outline lines up with the coastline.
+- The landing footer now credits the map data: geoBoundaries (CC BY 4.0, which requires attribution) and Natural Earth.
+- Checked in headless Chrome with `Math.random` pinned so the second cycle went global: 1× → 0.07× (world) → 10.4× (Nairobi), ring constant at 60 px, no console errors.
 - Released 2026-10-26 with the user's approval.
