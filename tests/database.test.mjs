@@ -317,5 +317,19 @@ test('database enforces booking, payment and staff permissions',async t=>{
   assert.equal((await query('select directory_photo from public.profiles where id=$1',[erin]))[0].directory_photo,'');
   await as(erin);assert.equal((await query("delete from storage.objects where name=$1 returning name",[mine])).length,1);
  });
+ await t.test('landing page sees only each room\'s next free time',async()=>{
+  await as(null,'anon');const open=await query('select * from public.next_open_times()');
+  const rooms=await query("select count(*)::int as n from public.spaces where active and booking_enabled");assert.equal(open.length,rooms[0].n);
+  assert.deepEqual(Object.keys(open[0]).sort(),['minutes','name','slug','starts_at']);
+  await db.exec('reset role');
+  for(const o of open){const id=(await query('select id from public.spaces where slug=$1',[o.slug]))[0].id;
+   assert.equal((await query("select private.slot_ok($1::uuid,$2::timestamptz,$2::timestamptz+make_interval(mins=>$3::int)) as ok",[id,o.starts_at,o.minutes]))[0].ok,true);}
+  // Block a room's next free hour and its next time moves later.
+  const first=open[0],id=(await query('select id from public.spaces where slug=$1',[first.slug]))[0].id;
+  await query("insert into public.space_blocks(space_id,starts_at,ends_at) values($1,$2::timestamptz,$2::timestamptz+interval '1 hour')",[id,first.starts_at]);
+  await as(null,'anon');const after=(await query('select starts_at from public.next_open_times() where slug=$1',[first.slug]))[0];
+  assert.ok(new Date(after.starts_at)>new Date(first.starts_at));
+  await db.exec('reset role');await query('delete from public.space_blocks where space_id=$1 and starts_at=$2',[id,first.starts_at]);
+ });
  await db.close();
 });

@@ -2,13 +2,13 @@ import {getClient,configured,result} from './supabase-client.js';
 import {escapeHTML as e} from './booking-utils.js';
 import {COUNTIES,DISCIPLINES,AREAS,countySlug,artistCard} from './directory-data.js';
 import {viewBox,counties} from './kenya-counties.js';
+import {SVG,spotIn,twinkle,dot} from './map-dots.js';
 
 const map=document.querySelector('#directory-map'),list=document.querySelector('#directory-list'),summary=document.querySelector('#directory-count');
 const roleFilter=document.querySelector('#directory-roles'),countySelect=document.querySelector('#directory-county'),areaSelect=document.querySelector('#directory-area'),more=document.querySelector('#directory-more');
 const PAGE=24;
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const fullView=viewBox.split(' ').map(Number);
-const SVG='http://www.w3.org/2000/svg';
 let view=fullView.slice(),zooming=0;
 let artists=[],role='',county='',area='',shown=PAGE;
 const areaShapes=new Map(); // county -> constituency outlines, fetched the first time that county is opened
@@ -48,17 +48,10 @@ function drawMap(){
 
 // One twinkling dot per listed person, somewhere inside their area (once its outlines are loaded) or county.
 // Busier places twinkle faster. Above MAX_LIGHTS each light stands for several people, so cheap phones keep up.
-const MAX_LIGHTS=400,MAX_RIPPLES=80,RIPPLE_PX=44,spots=new Map();
-function seeded(text){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);
- return ()=>{h=h+0x6D2B79F5|0;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const MAX_LIGHTS=400,MAX_RIPPLES=80,RIPPLE_PX=44;
 function spot(a){
  const shape=(a.area&&map.querySelector(`.map-areas[data-county="${CSS.escape(a.county)}"] path[data-area="${CSS.escape(a.area)}"]`))||map.querySelector(`path[data-county="${CSS.escape(a.county)}"]`);
- if(!shape)return null;
- const key=[a.full_name,a.instagram,a.website,a.email,a.county,shape.dataset.area||''].join('|');if(spots.has(key))return spots.get(key);
- // Same person, same spot on every visit: the position is seeded from who they are, not Math.random.
- const rand=seeded(key),b=shape.getBBox(),pt=shape.ownerSVGElement.createSVGPoint();let found=[b.x+b.width/2,b.y+b.height/2];
- for(let i=0;i<40;i++){pt.x=b.x+rand()*b.width;pt.y=b.y+rand()*b.height;if(shape.isPointInFill(pt)){found=[pt.x,pt.y];break;}}
- found.push(rand());spots.set(key,found);return found;
+ return shape?spotIn(shape,a):null;
 }
 function drawLights(listed,tally,max){
  const svg=map.querySelector('svg');let lights=svg.querySelector('.map-lights');
@@ -66,8 +59,7 @@ function drawLights(listed,tally,max){
  svg.insertBefore(lights,svg.querySelector('.map-labels'));
  const per=Math.ceil(listed.length/MAX_LIGHTS)||1;
  lights.innerHTML=listed.filter((_,i)=>i%per===0).map(a=>{const s=spot(a);if(!s)return '';
-  const speed=4.2-2.8*Math.sqrt((tally.get(a.county)||0)/max);
-  return `<path d="M${s[0].toFixed(1)} ${s[1].toFixed(1)}h.01" style="animation-duration:${speed.toFixed(2)}s;animation-delay:-${(s[2]*speed).toFixed(2)}s"/>`;}).join('');
+  return dot(s,twinkle(tally.get(a.county)||0,max));}).join('');
  lights.classList.toggle('is-zoomed',!!county);
  drawRipples(listed.filter(a=>a.county===county&&(!area||a.area===area)));
  document.querySelector('#map-light-key').textContent=per>1?`Each dot is about ${per} people.`:'Each dot is one person.';
