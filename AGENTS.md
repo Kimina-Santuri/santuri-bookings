@@ -324,3 +324,8 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - Quick facts: `#fact-rooms` is set by `catalog.js` (room count; it no longer writes the hourly rate), and `#fact-people` and `#fact-counties` by `home.js` once listings load. Before that they show the old static "1,000 KES per hour" and "01 Nairobi location".
 - Tests: "landing page sees only each room's next free time" (anon sees one row per bookable room with only those four columns, each time passes `slot_ok`, and blocking a room's next hour moves it later); 35/35 pass. Checked in headless Chrome at 1440 and 390 px against live public data, with `next_open_times` stubbed with made-up times (it wasn't live yet). No horizontal scroll and no console errors.
 - Released 2026-10-26: the user ran `202610260001_next_open_times.sql`. Verified over REST as anon: 4 rows with only slug, name, starts_at and minutes (DJ Practice Room and Classroom free from 14:30 that day with 2 h notice; Workstation and Studio the next mornings with 5 h notice).
+
+## Booking steps moved to the Spaces page (2026-10-26)
+
+- At the user's request, the "From idea to room in three steps" section (`.how-section#how`) was removed from `index.html` and placed in `spaces.html`, before the house rules. The landing page now runs hero › explore › spaces › membership › gear › directory › visit. The "How it works" links in the landing header and footer and in `nura-jck.html` now go to `spaces.html#how` (on `spaces.html` itself, `#how`). `catalog.js` still rewrites step two's wording, now on the Spaces page. The gear and directory pages keep their own step sections.
+- Released 2026-10-26 with the user's approval.
