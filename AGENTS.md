@@ -303,3 +303,14 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 
 - Once a county (or area) is open, its dots grow from 4 to 10 px (`.map-lights.is-zoomed`, eased) and each sends out two radar rings half a beat apart (`drawRipples()` in `directory.js`, `.map-ripples circle`, 2.6 s `ripple` keyframes scaling 0.25→1 while fading out). Only the open county's people (or the open area's) get rings, capped at 80 people (160 rings), and the role filter applies. The ring radius is set in map units for the zoom being shown, so it comes out about 88 px across on screen at any zoom (`RIPPLE_PX=44`, raised from 26 at the user's request), and the ring line doesn't scale. The all-Kenya view has no rings. With reduced motion, the rings are hidden and the dots are still bigger. No database change.
 - Released 2026-10-25 with the user's approval.
+
+## Landing page sections (2026-10-26)
+
+- `index.html` now has, after the hero: an **explore strip** (`.explore`: Spaces, Membership, Gear rental, Artist directory as numbered tiles jumping to `#spaces`, `#membership`, `#gear` and `#directory`; it matters most on phones, where the header hides every link except Book a space), the existing spaces and "How it works" sections, then three new sections before Visit:
+  - **Membership** (`#membership`): Mwanzo 500, Midi 1,500 and Sana 3,000 KES/month tier cards, with benefits taken from `membership.html`, the Free Tier line and a link to compare. These are static: update them with `membership.html` if prices change.
+  - **Gear** (`#gear`): up to four live `gear_items` with photos, rentable ones first (price shown only when available, quantity > 0 and price > 0; otherwise "Ask the team"), each linking to `rent-gear.html?item=…` or `gear.html`. The grid stays hidden if nothing loads.
+  - **Directory** (`#directory`): a live count ("N people listed across M counties") and the first three of `artist_directory()` (random order, never ranked) drawn with the shared `artistCard`, including photos, plus Browse and Get listed links.
+- Script: `assets/js/home.js` (module). Failures are ignored, so the static copy and links remain.
+- The Calendly wording was replaced in the static spaces intro and step 02 of "How it works" ("Request a time"; step 03 is now "Get confirmed"). `catalog.js` still overwrites those two lines with its own booking-calendar wording when online booking is configured.
+- Checked in headless Chrome at 1280 and 390 px against live public data (4 gear cards, 1 listing), with no horizontal scroll and no console errors.
+- Released 2026-10-26 with the user's approval.
