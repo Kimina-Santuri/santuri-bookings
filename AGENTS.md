@@ -348,3 +348,14 @@ Serve the repository as static files and check index.html, spaces.html, membersh
 - The landing footer now credits the map data: geoBoundaries (CC BY 4.0, which requires attribution) and Natural Earth.
 - Checked in headless Chrome with `Math.random` pinned so the second cycle went global: 1× → 0.07× (world) → 10.4× (Nairobi), ring constant at 60 px, no console errors.
 - Released 2026-10-26 with the user's approval.
+
+## NURA open to everyone at 1,000 KES per hour (2026-10-30)
+
+- Agreed with the team (user, 2026-10-30): for now anyone signed in can book NURA sessions; staff no longer grant NURA access. The same migration makes `private.nura_balance` treat every signed-in member as active (4 hours per week each). `private.nura_members`, `set_nura_member` and the Members "NURA" role column are kept, so access can be restricted again by restoring the `exists()` check. The Members dialog's grant/remove NURA button is removed and the panel reads "Open to every member". `nura-jck.html` now says to sign in or create a free account instead of asking staff.
+
+- User request: someone booking from the NURA x JCK portion pays 1,000 KES per hour. Before this, NURA bookings had no rental charge (price 0). The DJ Practice Room and Classroom stay at 1,500 KES/hr for ordinary bookings; only NURA bookings use the flat rate.
+- Migration `supabase/migrations/202610300001_nura_rate.sql` replaces `request_nura_booking` (price = 1,000 × hours; staff still free) and `reschedule_booking` (a NURA booking keeps the flat rate when staff move it; no membership discount applies). NURA access and the 4-hour weekly cap are unchanged. Existing NURA bookings keep their saved price of 0 unless rescheduled.
+- `assets/js/account.js`: NURA booking card shows "1,000 KES / hour", the summary shows the estimated total, member booking cards show the NURA price with outstanding/paid, the staff agenda shows the price rather than "Allowance", and the dashboard NURA panel and booking hint mention the rate. `nura-jck.html` "Before you book" now states the rate.
+- Staff record NURA payments in the Payments tab like any other booking (`record_payment` caps at the booking price). Booking emails don't show prices, so no email change.
+- Tests: `tests/database.test.mjs` (members without the old NURA role are active; removing the role doesn't block booking; 2-hour NURA booking priced 2,000; request email payload) and `tests/reschedule.test.mjs` (rescheduled to 2 hours stays 2,000). `npm test` 35/35 pass, `npm run check` clean.
+- Not yet done: the user runs the migration in the Supabase SQL editor, then approves the push. Not checked in a browser against live data.

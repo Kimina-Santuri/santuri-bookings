@@ -151,17 +151,17 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await rpc('set_student_member',[bob,false]);assert.equal((await rpc('member_allowances',[bob,start])).production.tier,'sana');
   await as(bob);await rejects(()=>rpc('request_booking',[rooms.find(r=>r.allowance_kind==='none').id,extra,60,true,'',randomUUID()]),/No eligible/);
  });
- await t.test('NURA access is staff-assigned and cannot be forged during signup',async()=>{
+ await t.test('NURA is open to every member; staff roles cannot be forged during signup',async()=>{
   await as(null,'anon');await rejects(()=>rpc('set_nura_member',[alice,true]),/permission denied/);
   await rejects(()=>rpc('nura_slots',['2026-09-18',60]),/permission denied/);
   await rejects(()=>rpc('request_nura_booking',[start,60,'',randomUUID()]),/permission denied/);
   await as(alice);await rejects(()=>rpc('set_nura_member',[alice,true]),/Staff access/);
   await rejects(()=>query('insert into private.nura_members values($1)',[alice]),/permission denied/);
   await rejects(()=>rpc('member_allowances',[bob,start]),/Staff access/);
-  assert.equal((await rpc('my_allowances',[start])).nura.active,false);
+  assert.equal((await rpc('my_allowances',[start])).nura.active,true,'NURA open to every member');
   const outsider=randomUUID();await db.exec('reset role');
   await query("insert into auth.users(id,email,raw_user_meta_data) values($1,'nura@example.test',$2)",[outsider,{nura:true,role:'staff',student:true}]);
-  await as(outsider);assert.equal((await rpc('my_allowances',[start])).nura.active,false);assert.equal(await rpc('is_staff'),false);
+  await as(outsider);assert.equal((await rpc('my_allowances',[start])).nura.active,true);assert.equal(await rpc('is_staff'),false);
   await as(admin);await rejects(()=>rpc('set_nura_member',[alice,null]),/choice/);
   await rpc('set_nura_member',[alice,true]);await rpc('set_nura_member',[bob,true]);
  });
@@ -182,7 +182,7 @@ test('database enforces booking, payment and staff permissions',async t=>{
   const key=randomUUID(),first=await rpc('request_nura_booking',[friday,120,'Practice',key]);
   assert.equal(await rpc('request_nura_booking',[friday,120,'Practice',key]),first);
   const row=(await query('select * from bookings where id=$1',[first]))[0];
-  assert.equal(row.space_id,dj.id);assert.equal(row.allowance_kind,'nura');assert.equal(Number(row.price),0);assert.equal(row.space_name,dj.name);
+  assert.equal(row.space_id,dj.id);assert.equal(row.allowance_kind,'nura');assert.equal(Number(row.price),2000,'NURA is 1,000 KES/hr');assert.equal(row.space_name,dj.name);
   await as(bob);await rejects(()=>rpc('request_booking',[dj.id,friday,60,false,'',randomUUID()]),/unavailable/);
   await rejects(()=>rpc('request_nura_booking',[friday,60,'',randomUUID()]),/unavailable/);
   const regular=await rpc('request_booking',[classroom.id,saturday,60,false,'',randomUUID()]);
@@ -196,9 +196,10 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await rpc('set_booking_status',[first,'cancelled','']);assert.equal((await rpc('my_allowances',[friday])).nura.remaining,120);
   await db.exec('reset role');await query("update bookings set status='no_show' where id=$1",[second]);await as(admin);
   let balance=(await rpc('member_allowances',[alice,friday])).nura;assert.equal(balance.used,120);assert.equal(balance.remaining,120);
+  // The old staff-assigned role no longer gates NURA: removing it changes nothing.
   await rpc('set_nura_member',[alice,false]);await as(alice);
-  await rejects(()=>rpc('request_nura_booking',[friday,60,'',randomUUID()]),/assigned by staff/);
-  await rejects(()=>rpc('nura_slots',[friday.slice(0,10),60]),/assigned by staff/);
+  assert.equal((await rpc('my_allowances',[friday])).nura.remaining,120);
+  await query('select * from nura_slots($1,60)',[friday.slice(0,10)]);
   await as(admin);await rpc('set_nura_member',[alice,true]);
   assert.equal((await rpc('member_allowances',[alice,friday])).nura.remaining,120);
   assert.equal((await rpc('member_allowances',[alice,new Date(new Date(friday).getTime()+7*86400000).toISOString()])).nura.remaining,240);
@@ -211,7 +212,7 @@ test('database enforces booking, payment and staff permissions',async t=>{
   await as(null,'service_role');
   const jobs=await query('select * from calendar_jobs()');assert.ok(jobs.some(j=>j.booking_id===first&&j.calendar_id==='nura-dj@example.test'));
   const email=(await query("select payload from private.email_outbox where booking_id=$1 and kind='request_received'",[second]))[0].payload;
-  assert.equal(email.space,classroom.name);assert.equal(Number(email.price),0);assert.equal(email.use_allowance,true);
+  assert.equal(email.space,classroom.name);assert.equal(Number(email.price),2000);assert.equal(email.use_allowance,true);
   await rpc('replace_google_blocks',[dj.id,[{id:'holiday',start:friday.slice(0,10)+'T00:00:00+03:00',end:saturday.slice(0,10)+'T00:00:00+03:00'}],1]);
   await as(alice);assert.equal((await query('select * from nura_slots($1,60)',[friday.slice(0,10)])).length,0);
   await rejects(()=>rpc('request_nura_booking',[friday,60,'',randomUUID()]),/unavailable/);

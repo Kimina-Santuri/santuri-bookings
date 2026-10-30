@@ -101,6 +101,8 @@ test('staff reschedule keeps availability, allowance, price, calendar and email 
   await rejects(()=>rpc('reschedule_booking',[nura,friday,300,'Too long']),/NURA/);
   await rpc('reschedule_booking',[nura,at(friday,hours(7)),60,'Evening slot']);
   assert.equal(new Date((await booking(nura)).ends_at).getUTCHours(),16,'ends 19:00 EAT');
+  await rpc('reschedule_booking',[nura,at(friday,hours(5)),120,'Longer']);
+  assert.equal(Number((await booking(nura)).price),2000,'NURA stays 1,000 KES/hr when rescheduled');
   const slots=await query('select * from reschedule_slots($1,$2,60)',[nura,friday.slice(0,10)]);
   assert.ok(slots.length&&slots.every(s=>s.starts_at.getUTCHours()>=8));
  });
